@@ -1,7 +1,7 @@
 pageType: content
 background:
   type: image
-  src: media/yu7-detail.jpg
+  src: assets/yu7-detail.jpg
   fit: {mode: cover}
 elements:
   - elementId: design-wash

@@ -6,7 +6,7 @@ elements:
   - elementId: side-img
     elementType: image
     bounds: [0, 0, 468, 540]
-    src: "media/horse_dusk_bl.jpg"
+    src: "assets/horse_dusk_bl.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

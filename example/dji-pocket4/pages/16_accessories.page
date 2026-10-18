@@ -6,7 +6,7 @@ elements:
   - elementId: acc-img
     elementType: image
     bounds: [48, 108, 500, 364]
-    src: "media/accessories.jpg"
+    src: "assets/accessories.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

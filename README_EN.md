@@ -40,10 +40,12 @@ python3 skills/open-pptd/scripts/install_binary.py
 # Non-interactive install to shared skills directory:
 npx open-pptd-skill install -y
 
+# Or install directly via GitHub repository:
+npx github:shiquda/open-pptd-skill install -y
+
 # Or install to a specific agent directory:
 npx open-pptd-skill install --target ~/.claude/skills
 ```
-
 ### Option 3: Compile from Source via Cargo
 
 ```bash
@@ -67,18 +69,31 @@ python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 ### 2. Decompile Existing PPTX to PPTD (`convert`)
 
 ```bash
-# Decompile presentation into a modular project directory:
-slideforge convert input.pptx -o ./project_dir/
+# Positional arguments: input presentation and output directory (no -o flag):
+slideforge convert input.pptx ./project_dir/
 
 # Or via Python wrapper:
 python3 skills/open-pptd/scripts/convert_pptx.py input.pptx -o ./project_dir/
 ```
-
 ### 3. Image Slices & Overview Montage (`export_images`)
 
 ```bash
 python3 skills/open-pptd/scripts/export_images.py deck.pptd -o qa-images/
 ```
+
+### 4. Comprehensive Validation & QA (`validate_pptx`)
+
+```bash
+python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8 --check-notes
+```
+
+---
+
+## 🔒 `.sync.hash` Overwrite Guard & Bi-directional Sync
+
+`slideforge` maintains a `.sync.hash` ledger in every project directory:
+- **Overwrite Guard**: `build` verifies the live SHA-256 of an existing target `.pptx`. If it was altered externally, `build` refuses to overwrite (exit code 2) to protect uncommitted manual work.
+- **Smart Skip**: `convert` verifies the source `.pptx` hash and skips re-conversion (`unchanged → skipped convert`) if it has not changed.
 
 ---
 

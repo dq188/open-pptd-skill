@@ -159,7 +159,7 @@ elements:
   - elementId: toc-img
     elementType: image
     bounds: [600, 96, 312, 312]
-    src: "media/product_sq.jpg"
+    src: "assets/product_sq.jpg"
     fit: {mode: cover}
   - elementId: toc-img-caption
     elementType: text

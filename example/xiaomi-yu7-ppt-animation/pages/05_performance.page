@@ -1,7 +1,7 @@
 pageType: content
 background:
   type: image
-  src: media/yu7-performance.jpg
+  src: assets/yu7-performance.jpg
   fit: {mode: cover}
 elements:
   - elementId: perf-wash

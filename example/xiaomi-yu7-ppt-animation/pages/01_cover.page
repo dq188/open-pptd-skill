@@ -1,7 +1,7 @@
 pageType: cover
 background:
   type: image
-  src: media/yu7-hero.jpg
+  src: assets/yu7-hero.jpg
   fit: {mode: cover}
 elements:
   - elementId: cover-wash

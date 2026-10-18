@@ -1,7 +1,7 @@
 pageType: content
 background:
   type: image
-  src: "media/bg_had.jpg"
+  src: "assets/bg_had.jpg"
   fit: {mode: cover}
 elements:
   - elementId: overlay

@@ -47,7 +47,7 @@ def convert_pptx(
     t0 = time.monotonic()
     print(f"[open-pptd-skill] Decompiling {pptx_path.name} -> {out_dir}/ via slideforge convert...")
     proc = subprocess.run(
-        [str(compiler), "convert", str(pptx_path), "-o", str(out_dir)],
+        [str(compiler), "convert", str(pptx_path), str(out_dir)],
         capture_output=True,
         text=True,
     )

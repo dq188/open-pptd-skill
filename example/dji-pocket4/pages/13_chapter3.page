@@ -6,7 +6,7 @@ elements:
   - elementId: bg-img
     elementType: image
     bounds: [0, 0, 960, 540]
-    src: "media/picnic.jpg"
+    src: "assets/picnic.jpg"
     fit: {mode: cover}
   - elementId: dim
     elementType: shape

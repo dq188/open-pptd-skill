@@ -6,12 +6,12 @@ elements:
   - elementId: img1
     elementType: image
     bounds: [520, 110, 392, 186]
-    src: "media/osmoaudio.jpg"
+    src: "assets/osmoaudio.jpg"
     fit: {mode: cover}
   - elementId: img2
     elementType: image
     bounds: [520, 312, 392, 180]
-    src: "media/mic3.jpg"
+    src: "assets/mic3.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

@@ -6,12 +6,12 @@ elements:
   - elementId: img1
     elementType: image
     bounds: [512, 48, 400, 232]
-    src: "media/slowmo_skate.jpg"
+    src: "assets/slowmo_skate.jpg"
     fit: {mode: cover}
   - elementId: img2
     elementType: image
     bounds: [512, 296, 400, 196]
-    src: "media/slowmo_rollers.jpg"
+    src: "assets/slowmo_rollers.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

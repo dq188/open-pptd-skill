@@ -203,7 +203,7 @@ async function promptInstallTargets() {
     if (!initial) {
       output.write(`\u001b[${lines}A`);
     }
-    output.write("Install open-kimi-ppt to which skills directories?\n");
+    output.write("Install open-pptd to which skills directories?\n");
     output.write("↑/↓ move · space select · a all · enter confirm · ctrl+c cancel\n");
     for (const [index, choice] of choices.entries()) {
       const pointer = index === cursor ? "❯" : " ";

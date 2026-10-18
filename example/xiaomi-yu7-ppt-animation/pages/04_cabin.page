@@ -1,7 +1,7 @@
 pageType: content
 background:
   type: image
-  src: media/yu7-cabin.jpg
+  src: assets/yu7-cabin.jpg
   fit: {mode: cover}
 elements:
   - elementId: cabin-wash

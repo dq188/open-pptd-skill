@@ -81,7 +81,7 @@ elements:
   - elementId: product-img
     elementType: image
     bounds: [628, 176, 284, 160]
-    src: "media/product_black.jpg"
+    src: "assets/product_black.jpg"
     fit: {mode: cover}
   - elementId: product-caption
     elementType: text

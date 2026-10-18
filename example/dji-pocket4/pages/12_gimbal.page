@@ -6,7 +6,7 @@ elements:
   - elementId: side-img
     elementType: image
     bounds: [0, 0, 468, 540]
-    src: "media/tripod_street_bl.jpg"
+    src: "assets/tripod_street_bl.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

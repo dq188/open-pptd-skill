@@ -6,7 +6,7 @@ elements:
   - elementId: hero
     elementType: image
     bounds: [0, 0, 960, 540]
-    src: "media/hero_sunset.jpg"
+    src: "assets/hero_sunset.jpg"
     fit: {mode: cover}
   - elementId: overlay
     elementType: shape

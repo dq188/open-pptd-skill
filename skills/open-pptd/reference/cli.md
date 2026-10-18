@@ -19,6 +19,24 @@ cargo install --git https://github.com/shiquda/slideforge.git
 ```
 
 ---
+### `slideforge check`
+Performs strict semantic and structural validation of a PPTD project without building.
+
+```bash
+slideforge check <MANIFEST>
+```
+
+Checks for:
+- Unknown or misspelled YAML fields on page and element definitions
+- Invalid DrawingML preset shape names with automatic suggestions
+- Undefined theme color `$colorKey` references
+- Missing local image or media files
+- Unsupported rich text tags (such as `<ul>`, `<ol>`, `<li>`, `<a>`)
+- Unsupported element types (such as `chart`)
+- Potential vertical or horizontal text box overflows
+
+---
+
 
 ## Commands
 
@@ -46,18 +64,16 @@ slideforge build deck.pptd -o my_slides.pptx
 Decompiles an existing PowerPoint `.pptx` file into a clean, editable PPTD project.
 
 ```bash
-slideforge convert <INPUT_PPTX> [OPTIONS]
+slideforge convert <INPUT_PPTX> <OUTPUT_DIR>
 ```
 
 **Arguments:**
 - `<INPUT_PPTX>`: Path to input PowerPoint presentation.
-
-**Options:**
-- `-o, --output <DIR>`: Output directory for the generated PPTD project.
+- `<OUTPUT_DIR>`: Output directory for the generated PPTD project.
 
 **Example:**
 ```bash
-slideforge convert input.pptx -o ./project_dir
+slideforge convert input.pptx ./project_dir
 ```
 
 ---

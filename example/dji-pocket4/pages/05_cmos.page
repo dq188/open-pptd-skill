@@ -6,7 +6,7 @@ elements:
   - elementId: side-img
     elementType: image
     bounds: [492, 0, 468, 540]
-    src: "media/night_vlog_bl.jpg"
+    src: "assets/night_vlog_bl.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape

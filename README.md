@@ -41,13 +41,15 @@ python3 skills/open-pptd/scripts/install_binary.py
 将 `open-pptd-skill` 注册到本地 Agent 的 Skills 目录下（如 `~/.agents/skills`、`~/.claude/skills` 等）：
 
 ```bash
-# 通过 npx 快速分发安装
+# 通过 npm / npx 快速分发安装
 npx open-pptd-skill install -y
+
+# 或直接从 GitHub 仓库运行
+npx github:shiquda/open-pptd-skill install -y
 
 # 或在特定目录下安装
 npx open-pptd-skill install --target ~/.claude/skills
 ```
-
 ### 方式三：通过 Cargo 源码编译
 
 ```bash
@@ -73,18 +75,33 @@ python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 将现有的 `.pptx` 解构为可继续编程编辑的声明式 PPTD 项目目录（含 `deck.pptd` 及每页 `.page` YAML 文件）：
 
 ```bash
-# 使用 slideforge convert
-slideforge convert existing_deck.pptx -o ./project_dir/
+# 使用 slideforge convert（位置参数：输入文件 输出目录，无需 -o）
+slideforge convert existing_deck.pptx ./project_dir/
 
 # 或通过 Python 脚本
 python3 skills/open-pptd/scripts/convert_pptx.py existing_deck.pptx -o ./project_dir/
 ```
-
 ### 3. 多页切片与全景总览图导出 (`export_images`)
 
 ```bash
 python3 skills/open-pptd/scripts/export_images.py deck.pptd -o qa-images/
 ```
+
+### 4. 产物全面质检与验证 (`validate_pptx`)
+
+检查 PPTX 文件的结构完整性、实际幻灯片页数、演讲者备注、检测未转义/漏出来的 HTML 标签以及潜在的边界与文本溢出：
+
+```bash
+python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8 --check-notes
+```
+
+---
+
+## 🔒 `.sync.hash` 覆写守卫与双向同步
+
+`slideforge` 在项目根目录下维护 `.sync.hash` 哈希记录：
+- **防覆盖守卫**：`build` 输出如果已存在，若其被外部直接编辑导致实时 SHA-256 与记录不符，编译器将报错拦截（退出码 2，提示 `changed after its last recorded sync point`），防止覆盖人类未提交的修改。
+- **智能跳过**：`convert` 在目标 PPTX 未发生变化时自动跳过（`unchanged → skipped convert`），保护本地已有 PPTD 代码。
 
 ---
 

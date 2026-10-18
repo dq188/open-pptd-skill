@@ -6,7 +6,7 @@ elements:
   - elementId: side-img
     elementType: image
     bounds: [528, 48, 384, 444]
-    src: "media/portrait.jpg"
+    src: "assets/portrait.jpg"
     fit: {mode: cover}
   - elementId: hd-bar
     elementType: shape
