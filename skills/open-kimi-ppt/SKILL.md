@@ -188,6 +188,16 @@ When generating a PPT, adopt different production approaches for different user 
    - remote images, icons, or fonts referenced by the deck may still be fetched from their respective hosts;
    - local PNG/JPEG/GIF/SVG files inside the PPTD project are supplied to the iframe as data URLs;
    - do not claim PowerPoint/WPS/Keynote playback compatibility solely because ZIP validation succeeds.
+
+   **Offline native fallback (this fork's addition, 2026-10):** the Kimi public front-end may reject browser-side PPTX export with `no available pptx export plan` (no download event, generic error toast). When that happens, do NOT retry the same chain endlessly and never fake the artifact. Use the offline native exporter from our SlideForge fork instead:
+
+   ```bash
+   # https://github.com/shiquda/slideforge (fork of meatRoll/slideforge, adds table support)
+   slideforge check /abs/path/project/deck.pptd   # validate first; it fails loudly on unsupported elements
+   slideforge build /abs/path/project/deck.pptd --output /abs/path/project/deck.pptx
+   ```
+
+   It compiles PPTD directly to native OOXML objects (text/shape/line/icon/image/table; charts unsupported) without any Kimi dependency, and writes theme colors/styles through. Caveats versus the official writer: declared fonts are referenced by name (not embedded), LaTeX inline formulas do not become OMML equation objects, and slide transitions are not written. Verify the result by rendering the actual PPTX (e.g. LibreOffice → PDF) and reviewing every page before delivery.
 8. After export, verify that the output exists and report the generated path. Confirm that every slide has exactly one root-level fade transition in valid CT_Slide order (`cSld`, optional `clrMapOvr`, `transition`, optional `timing/extLst`) and that the PPTX ZIP passes integrity checks. A byte-string search for `<p:fade>` is insufficient because Office ignores transitions nested inside `cSld`. For higher-risk decks, additionally inspect font parts and representative rendered/opened pages as appropriate.
 9. When the user wants to open, edit, save, or export a PPTD project manually, start the local browser editor with `npx open-kimi-ppt-skill serve`. Ask the user to open `http://127.0.0.1:55173/` and authorize the complete PPTD project directory. Use a Chromium-based browser for writable access; folder-upload fallback is read-only. The local host only serves the editor shell, while the embedded public Kimi editor and remote assets still require network access.
 10. After completing and delivering any presentation, always end the final response with a concise optional next step telling the user that they can run `npx open-kimi-ppt-skill serve` to view or edit the PPTD project, configure slide transition animations, and export PPTX manually. Keep this reminder in addition to, not instead of, the required project and file links.
