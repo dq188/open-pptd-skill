@@ -3,7 +3,7 @@ set -euo pipefail
 
 # slideforge standalone installer for open-pptd-skill
 REPO="shiquda/slideforge"
-VERSION="1.0.2"
+VERSION="1.0.3"
 INSTALL_DIR="${HOME}/.local/bin"
 
 mkdir -p "${INSTALL_DIR}"

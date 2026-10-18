@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 REPO = "shiquda/slideforge"
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 
 def detect_target() -> Optional[Tuple[str, str]]:
