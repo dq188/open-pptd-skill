@@ -8,7 +8,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { fileURLToPath } from "node:url";
 import { startEditorServer } from "../lib/editor-server.js";
 
-const SKILL_NAME = "open-kimi-ppt";
+const SKILL_NAME = "open-pptd";
 const MIN_NODE_MAJOR = 18;
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDirectory = join(packageRoot, "skills", SKILL_NAME);
@@ -36,7 +36,7 @@ function printHelp(command) {
     console.log(`Start the local PPTD editor and exporter.
 
 Usage:
-  open-kimi-ppt-skill serve [options]
+  open-pptd-skill serve [options]
 
 Options:
   --port <number>  HTTP port (default: 55173)
@@ -50,8 +50,8 @@ Options:
   console.log(`Install ${SKILL_NAME} for your AI coding agent or start its local editor.
 
 Usage:
-  open-kimi-ppt-skill [install] [options]
-  open-kimi-ppt-skill serve [options]
+  open-pptd-skill [install] [options]
+  open-pptd-skill serve [options]
 
 Install options:
   --target <directory>  Skills directory (repeatable)
@@ -65,10 +65,10 @@ In an interactive terminal (no --target / --yes / --all), a checklist is shown:
   ↑/↓ move  space select  a all  enter confirm
 
 For agents / CI, prefer:
-  npx open-kimi-ppt-skill@latest install -y
+  npx open-pptd-skill@latest install -y
 
-Re-running install replaces an existing open-kimi-ppt installation.
-Run "open-kimi-ppt-skill serve --help" for server options.
+Re-running install replaces an existing open-pptd installation.
+Run "open-pptd-skill serve --help" for server options.
 `);
 }
 
@@ -77,12 +77,19 @@ function printVersion() {
 }
 
 function parseArguments(arguments_) {
+  const raw = [...arguments_];
   const args = [...arguments_];
-  const command = args[0] === "install" || args[0] === "serve" ? args.shift() : "install";
-  const options = command === "serve"
-    ? { command, open: false, port: 55173 }
-    : { command, targets: [], yes: false, all: false };
-
+  const known = ["install", "serve", "build", "convert", "install-binary"];
+  const command = known.includes(args[0]) ? args.shift() : "install";
+  const options = {
+    command,
+    rawArgs: raw.slice(known.includes(raw[0]) ? 1 : 0),
+    targets: [],
+    yes: false,
+    all: false,
+    open: false,
+    port: 55173,
+  };
   while (args.length > 0) {
     const argument = args.shift();
 
@@ -360,12 +367,26 @@ async function main() {
     printHelp(options.command);
     return;
   }
+  if (options.command === "install-binary") {
+    const script = join(packageRoot, "skills", SKILL_NAME, "scripts", "install_binary.py");
+    const res = spawnSync("python3", [script, ...options.rawArgs], { stdio: "inherit" });
+    process.exit(res.status ?? 0);
+  }
+  if (options.command === "build") {
+    const script = join(packageRoot, "skills", SKILL_NAME, "scripts", "export_pptx.py");
+    const res = spawnSync("python3", [script, ...options.rawArgs], { stdio: "inherit" });
+    process.exit(res.status ?? 0);
+  }
+  if (options.command === "convert") {
+    const script = join(packageRoot, "skills", SKILL_NAME, "scripts", "convert_pptx.py");
+    const res = spawnSync("python3", [script, ...options.rawArgs], { stdio: "inherit" });
+    process.exit(res.status ?? 0);
+  }
 
   if (options.command === "install") {
     await installSkill(options);
     return;
   }
-
   const { server, url } = await startEditorServer({ port: options.port });
   console.log(`Open Kimi PPT editor is running at ${url}`);
   console.log("Press Ctrl+C to stop the server.");

@@ -51,3 +51,15 @@
 Use custom fonts to strengthen expressiveness or to fill font categories the built-in list does not cover (e.g. JetBrains Mono for monospace, Archivo Black for ultra-heavy sans-serif, EB Garamond for classical serif), brought in from Google Fonts via `customFonts`: declare `customFonts` in the `.pptd` entry file (see CustomFont in [pptd.md](./pptd.md)); the `family` name must match Google Fonts exactly, and once declared it can be referenced in `fontFamily`.
 
 Note: custom fonts follow the same "exactly identical names" requirement
+
+## slideforge Native Font Resolution & Safe Fallbacks
+
+When compiling PPTD to OpenXML (`.pptx`), `slideforge` automatically maps abstract font names to physically safe, universally installed system fonts to prevent operating systems (such as macOS CoreText) from falling back to cursive handwriting fonts like `HanziPen SC` (翩翩体):
+
+| PPTD Declared Font | East Asian (`<a:ea>`) | Latin (`<a:latin>`) | Target Aesthetic |
+|---|---|---|---|
+| `思源宋体` / `Source Han Serif` | `SimSun` (中易宋体 / 宋体-简) | `Georgia` | Classical scholarly, academic survey, paper report |
+| `MiSans` / `Liter` | `Microsoft YaHei` (微软雅黑) | `Arial` | Modern clean tech, product documentation |
+| `PingFang SC` / `苹方` | `PingFang SC` | `Arial` | Apple native minimalist sans |
+| `思源黑体` / `Noto Sans SC` | `Microsoft YaHei` | `Arial` | Universal cross-platform sans |
+| Unspecified / Inherited | Inherits Theme First Font | Inherits Theme First Font | Cohesive deck-wide consistency |
