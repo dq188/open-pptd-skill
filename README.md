@@ -141,6 +141,6 @@ my_presentation/
 1. **`open-kimi-ppt-skill`**：
    本项目源于并基于 Binaryify Zhuang 开发的 `open-kimi-ppt-skill`（MIT 许可证，[GitHub](https://github.com/acnlie/open-kimi-ppt-skill)）演进重构。在此致谢原作者对 PPTD 声明式幻灯片理念与 Agent Skill 的奠基性贡献。
 2. **`slideforge`**：
-   集成并合并由 shiquda 开发的原生 Rust 编译引擎 `slideforge`（MIT 许可证，[GitHub](https://github.com/shiquda/slideforge)）作为底层核心编译器，现作为单一代码库统一维护。
+   底层核心 Rust 编译器源自原作者 **meatRoll** 创建的开源项目 [`meatRoll/slideforge`](https://github.com/meatRoll/slideforge)（MIT 许可证）。由 shiquda 及其贡献者进行了深度二次开发（丰富富文本下划线/删除线排版、增强 LaTeX 数学公式渲染、实现完整演讲者备注 notesSlide 关系链、扩充 1422 个矢量图标库并强化 check 严格静态校验诊断），现正式合并并入 Open PPTD 单体代码库统一维护。在此向原作者 meatRoll 致以诚挚感谢。
 3. **Font Awesome 6 (Solid Icons)**：
    项目内嵌的矢量图标集合来源于 Font Awesome 6.7.2（CC BY 4.0 许可证，[License](https://fontawesome.com/license/free)）。

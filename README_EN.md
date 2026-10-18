@@ -123,6 +123,6 @@ This project is licensed under the [MIT License](LICENSE).
 1. **`open-kimi-ppt-skill`**:
    Originally conceived and authored by Binaryify Zhuang under the MIT License ([GitHub](https://github.com/acnlie/open-kimi-ppt-skill)). We gratefully acknowledge the pioneering work on PPTD declarative slide concepts and Agent skills.
 2. **`slideforge`**:
-   Merged and integrated from the high-performance native Rust compiler engine authored by shiquda under the MIT License ([GitHub](https://github.com/shiquda/slideforge)).
+   The underlying native Rust compiler engine was originally created by **meatRoll** ([`meatRoll/slideforge`](https://github.com/meatRoll/slideforge), MIT License). Further secondary development by shiquda and contributors added rich text formatting (`<u>`, `<s>`), tokenized academic LaTeX math rendering, PowerPoint speaker notes (`notesSlide`), expanded Font Awesome icon datasets, and strict semantic validation, before being fully integrated into Open PPTD. We gratefully acknowledge meatRoll's foundational work.
 3. **Font Awesome 6 (Solid Icons)**:
    Vector icons embedded in the compiler are from Font Awesome 6.7.2 under CC BY 4.0 ([License](https://fontawesome.com/license/free)).
