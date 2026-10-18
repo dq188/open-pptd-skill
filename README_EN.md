@@ -2,123 +2,156 @@
 
 [简体中文](README.md) | [English](README_EN.md)
 
-[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd?label=release)](https://github.com/shiquda/open-pptd/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd-skill?label=release)](https://github.com/shiquda/open-pptd-skill/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/shiquda/open-pptd-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/shiquda/open-pptd-skill/actions/workflows/ci.yml)
+[![Node >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![Rust >= 1.85](https://img.shields.io/badge/rust-%3E%3D1.85-orange)](https://www.rust-lang.org)
 
-An open-source full-stack presentation suite based on the **PPTD** (Declarative Presentation Language) specification and a high-performance native Rust compiler. Integrates both the **native compiler engine (`pptd` CLI)** and an **out-of-the-box AI Coding Agent skill (Agent Skill)** in a unified repository.
+**Open PPTD** is an open-source declarative presentation toolkit and AI Agent skill tailored for AI coding agents (Claude Code, Cursor, Codex, WorkBuddy, Multica) and developers. Built on the open **PPTD** (Declarative Presentation Language) YAML specification, it provides a **100% offline, sub-second native Rust compiler (`pptd` CLI)** and an out-of-the-box agent skill.
 
-Designed for AI Coding Agents (Claude Code, Codex, Cursor, WorkBuddy, Multica, etc.), **completely removing any dependency on the legacy Kimi web frontend, headless browser sessions, cookies, or cloud authentication**. Compiles and reverse-decompiles native OpenXML `.pptx` presentations 100% offline with sub-second execution speeds.
----
-
-## Key Features
-
-- 🚀 **100% Offline & High-Speed Compilation**: Zero cloud requests, zero browser automation. Emits genuine OpenXML presentations in <0.5s for 20-slide decks.
-- 📐 **DrawingML Vector Fidelity**: Renders native vector shapes, straight connector lines with directional arrowheads (`<a:tailEnd type="triangle"/>`), gradient fills, and precise line spacing.
-- 🔢 **Native LaTeX Mathematics**: Full inline LaTeX support (`\( h(s_t) \ge 0 \)`), with automatic variable italics and baseline shifts for subscripts.
-- 📊 **Bi-Directional Native Tables**: First-class support for PowerPoint `<a:tbl>` elements with cell merging (`rowSpan`/`colSpan`), borders, and background fills; seamlessly decompiles existing tables back to PPTD.
-- 🔤 **Cross-Platform Safe Font Fallbacks**: Maps fonts to safe system-installed typefaces across macOS and Windows (e.g. Source Han Serif maps safely to `SimSun` + `Georgia`), eliminating cursive handwriting fallback artifacts.
-- 📦 **Automated Binary Installation**: Downloads prebuilt binaries for macOS (Apple Silicon / Intel), Linux (x86_64 / arm64), and Windows on demand.
+It completely eliminates brittle dependencies on web sessions, headless browsers, cookies, or cloud API tokens, delivering fully editable, vector-sharp native PowerPoint (`.pptx`) decks and round-trippable project directories directly on your local machine.
 
 ---
 
-## Quick Installation
+## 🖼️ Showcase
 
-### Option 1: Automatic Binary Download (Recommended)
+Open PPTD adheres to a dual-deliverable model: **editable PPTD source code + production-ready native PPTX**. From enterprise keynotes to academic defense slides, it consistently produces professional typography:
+
+| Xiaomi YU7 Keynote Deck (Rich Editorial Layout) | DJI Pocket 4 Product Deck (Panoramic Visuals) |
+| :---: | :---: |
+| [![Xiaomi YU7 Presentation](docs/images/example-yu7-pptx.png)](docs/images/example-yu7-pptx.png) | [![DJI Pocket 4 Presentation](docs/images/example-dji-pocket4-pptx.png)](docs/images/example-dji-pocket4-pptx.png) |
+
+| DeepSeek Liquid Glass Presentation | Minimal Starter Benchmark (Tables / Lines / Notes) |
+| :---: | :---: |
+| [![DeepSeek Liquid Glass](docs/images/example-deepseek-liquid-glass.png)](docs/images/example-deepseek-liquid-glass.png) | [![Starter Template](example/starter/starter_expected.png)](example/starter/starter_expected.png) |
+
+---
+
+## 💡 Why Open PPTD?
+
+Common AI presentation generators suffer from major tradeoffs: programmatic OOXML builders easily misalign layouts, whole-page raster image generators cannot be edited in PowerPoint, and web HTML slides are not standard enterprise/academic PPTX files.
+
+| Metric | **Open PPTD** | Programmatic OOXML (e.g. pptxgenjs) | Whole-Page Image PPT | Web HTML Slides |
+|---|---|---|---|---|
+| **Default Deliverables** | **PPTD Project + Native PPTX** | Usually PPTX only | Single raster image in PPTX | Single HTML file |
+| **Agent Authoring** | **Declarative YAML**, clean AST | Verbose coordinates & brittle APIs | Prompt-dependent, unpredictable | Complex HTML/CSS constraints |
+| **PowerPoint Editing** | **100% Vector Lossless**, editable text & shapes | Editable, but brittle layout | Bitmap image; text cannot be edited | Not a native PPTX file |
+| **Build Speed & Deps** | **<0.05s** (Native Rust, 100% offline) | 1 ~ 5s (Node.js runtime) | 10 ~ 30s (Model queue) | Requires browser runtime |
+| **Math Typography** | **Academic LaTeX math rendering** (slanted vars, scripts) | Unsupported or requires plugins | Relies on raster text | MathJax / KaTeX rendering |
+| **Security & Privacy** | **Zero network calls**, sandbox-safe | Local runtime | Sends slide content to cloud LLM | Usually requires web renderer |
+
+---
+
+## ⚡ Quick Start
+
+### 1. Install the Native Compiler CLI (`pptd`)
+
+Supported platforms: macOS (Apple Silicon / Intel), Linux (x86_64 / arm64), and Windows (x86_64).
 
 ```bash
+# Method A: Automatic download script to ~/.local/bin/pptd (Recommended)
 curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
 
-# Or via Python script:
+# Method B: Cross-platform Python installer
 python3 skills/open-pptd/scripts/install_binary.py
+
+# Method C: Install from source using Cargo
+cargo install --git https://github.com/shiquda/open-pptd.git
 ```
 
-### Option 2: Register Skill for AI Agents
+Verify your installation:
+```bash
+pptd --version
+# Output: pptd 1.0.4
+```
+
+### 2. Register the Agent Skill (Optional)
+
+Install the skill into your AI coding assistant environment (Codex, Claude Code, Cursor, etc.):
 
 ```bash
-# Install to local Agent environment via npm / npx:
+# Install to default global skills directory ~/.agents/skills/open-pptd
 npx github:shiquda/open-pptd install -y
 
-# Or install to a specific agent directory:
+# Or specify a custom target path
 npx github:shiquda/open-pptd install --target ~/.claude/skills
 ```
-### Option 3: Compile from Source via Cargo
-
-The repository contains the complete Rust source code. You can compile and install both `pptd` and `open-pptd` CLI tools directly:
-
-```bash
-cargo install --git https://github.com/shiquda/open-pptd.git
 
 ---
 
-## CLI & Workflow
+## 🚀 Core Workflows & CLI Commands
 
-### 1. Static Syntax & Semantic Validation (`check`)
-
+### 1. Static Project Diagnostics (`pptd check`)
+Perform strict pre-compilation audits for syntax errors, undeclared fields, missing `$theme` color tokens, broken asset paths, and text overflow risks:
 ```bash
-pptd check deck.pptd
+pptd check my_project/deck.pptd
 ```
 
-### 2. Compile PPTD to Native PPTX (`build`)
-
+### 2. High-Speed Native Compilation (`pptd build`)
+Compile the declarative project into an OpenXML `.pptx` presentation with full vector shapes and speaker notes:
 ```bash
-# Direct CLI build:
-pptd build deck.pptd -o output.pptx
-
-# Or via Python script wrapper:
-python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
+pptd build my_project/deck.pptd -o presentation.pptx
 ```
 
-### 3. Decompile Existing PPTX to PPTD (`convert`)
-
+### 3. Decompile Existing PPTX to PPTD (`pptd convert`)
+Reverse-engineer an existing PowerPoint deck into an editable PPTD project directory (pages, master layouts, tables, and colors):
 ```bash
-# Direct CLI convert:
-pptd convert existing_deck.pptx ./project_dir/
-
-# Or via Python wrapper:
-python3 skills/open-pptd/scripts/convert_pptx.py existing_deck.pptx -o ./project_dir/
-```
-### 3. Image Slices & Overview Montage (`export_images`)
-
-```bash
-python3 skills/open-pptd/scripts/export_images.py deck.pptd -o qa-images/
+pptd convert presentation.pptx ./decompiled_project/
 ```
 
-### 4. Comprehensive Validation & QA (`validate_pptx`)
-
+### 4. Automated QA Verification (`validate_pptx.py`)
+Inspect the generated PPTX package for page counts, leaked unparsed HTML tags, boundary errors, and speaker note coverage:
 ```bash
-python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8 --check-notes
+python3 skills/open-pptd/scripts/validate_pptx.py presentation.pptx --expected-pages 8 --check-notes
 ```
 
 ---
 
-## 🔒 `.sync.hash` Overwrite Guard & Bi-directional Sync
+## 📋 Features
 
-`pptd` maintains a `.sync.hash` ledger in every project directory:
-- **Overwrite Guard**: `build` verifies the live SHA-256 of an existing target `.pptx`. If it was altered externally, `build` refuses to overwrite (exit code 2) to protect uncommitted manual work.
-- **Smart Skip**: `convert` verifies the source `.pptx` hash and skips re-conversion (`unchanged → skipped convert`) if it has not changed.
-
----
-
-## Documentation References
-
-Detailed specifications are available under `skills/open-pptd/reference/`:
-- [pptd.md](skills/open-pptd/reference/pptd.md): Core PPTD v2 DSL AST and element definitions
-- [shapes.md](skills/open-pptd/reference/shapes.md): Vector shape library and parameter specifications
-- [fonts.md](skills/open-pptd/reference/fonts.md): Cross-platform typography and font fallback mapping
-- [tables.md](skills/open-pptd/reference/tables.md): Native PowerPoint table structure and styling
-- [math.md](skills/open-pptd/reference/math.md): LaTeX mathematical formula formatting
-- [cli.md](skills/open-pptd/reference/cli.md): CLI command reference and options
+- 📐 **DrawingML Vector Geometries**: Native support for `rect`, `roundRect`, `ellipse`, `triangle`, and `diamond` with stroke, fill, and drop shadows.
+- 🔗 **Connector & Arrow Lines**: Relative vector coordinates `points: "0,0 dx,dy"` with start/end arrowheads (`triangle`, `stealth`, etc.).
+- 🔢 **Academic LaTeX Math Rendering**: In-line math equations like `\( h(s_t) \ge 0 \)` automatically tokenize into italicized Latin variables, scaled super/subscripts, and proper operators.
+- 📊 **Native Bi-directional Tables**: Full support for cell merging (`rowSpan`/`colSpan`), column width ratios, zebra striping, and round-tripping.
+- 🗣️ **PowerPoint Speaker Notes**: Page-level `notes: "..."` attributes seamlessly generate standard OOXML `notesSlide` relationships.
+- 🎨 **1422 Built-in Vector Icons**: Font Awesome 6.7.2 Solid vector dataset with automatic `fa-` prefix normalization and validation.
+- 🔒 **`.sync.hash` Overwrite Protection**: The compiler tracks content hashes to prevent accidental overwrites between manual edits and automated builds.
+- 🔤 **Cross-Platform Safe Fonts**: Intelligent Chinese and Latin font mapping prevents cursive/casual script fallbacks on Linux and Windows.
 
 ---
 
-## License & Attribution
+## 📁 PPTD Directory Structure
+
+A canonical, self-contained PPTD project directory looks like this:
+
+```text
+my_presentation/
+├── deck.pptd             # Manifest: slide size, theme tokens, typography, page list
+├── pages/
+│   ├── 01_cover.page     # Single slide AST (shapes, text, tables, connectors)
+│   ├── 02_problem.page
+│   └── 03_solution.page
+└── assets/               # Local images and media assets
+```
+
+For detailed specifications and guides, see:
+- [Agent Quickstart Guide (SKILL.md)](skills/open-pptd/SKILL.md)
+- [PPTD v2 Specification (pptd.md)](skills/open-pptd/reference/pptd.md)
+- [Pre-designed Theme Palettes (theme.md)](theme.md)
+- [CLI Reference Manual (cli.md)](skills/open-pptd/reference/cli.md)
+- [Typography & Font Guidelines (fonts.md)](skills/open-pptd/reference/fonts.md)
+
+---
+
+## 📄 License & Attribution
 
 This project is licensed under the [MIT License](LICENSE).
 
-### Acknowledgments & Upstream Attributions:
+### Acknowledgements & Upstream Projects:
 1. **`open-kimi-ppt-skill`**:
-   Originally conceived and authored by Binaryify Zhuang under the MIT License ([GitHub](https://github.com/acnlie/open-kimi-ppt-skill)). We gratefully acknowledge the pioneering work on PPTD declarative slide concepts and Agent skills.
-2. **Native Rust Compiler Core**:
-   The underlying native Rust compiler engine was originally created by **meatRoll** ([`meatRoll/slideforge`](https://github.com/meatRoll/slideforge), MIT License). Further secondary development by shiquda and contributors added rich text formatting (`<u>`, `<s>`), tokenized academic LaTeX math rendering, PowerPoint speaker notes (`notesSlide`), expanded Font Awesome icon datasets, and strict semantic validation, before being unified into Open PPTD as the `pptd` CLI tool. We gratefully acknowledge meatRoll's foundational work.
-3. **Font Awesome 6 (Solid Icons)**:
-   Vector icons embedded in the compiler are from Font Awesome 6.7.2 under CC BY 4.0 ([License](https://fontawesome.com/license/free)).
+   Evolved and refactored from `open-kimi-ppt-skill` by **Binaryify Zhuang** (MIT License, [GitHub](https://github.com/acnlie/open-kimi-ppt-skill)). We gratefully acknowledge Binaryify's foundational contribution to the PPTD declarative DSL and AI agent presentation skills.
+2. **`slideforge` (Native Rust Compiler Engine)**:
+   The underlying native Rust compiler engine was originally created by **meatRoll** ([`meatRoll/slideforge`](https://github.com/meatRoll/slideforge), MIT License). Further secondary development by shiquda and contributors added rich text formatting, LaTeX math typography, PowerPoint speaker notes (`notesSlide`), expanded Font Awesome icon datasets, and strict semantic validation, before being unified into Open PPTD under the `pptd` CLI. We gratefully acknowledge meatRoll's original engineering.
+3. **Font Awesome Free 6 (Solid Icons)**:
+   Vector icons embedded in the compiler are sourced from Font Awesome 6.7.2 under the CC BY 4.0 license ([License](https://fontawesome.com/license/free)).
