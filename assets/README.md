@@ -1,7 +1,7 @@
 # Font Awesome dataset
 
 `fa-solid-icons.json` — SVG path data (`d`) and viewBox for the Font Awesome
-**solid** (free) icons referenced by SlideForge's fixture decks / tests.
+**solid** (free) icons referenced by PPTD fixture decks / tests.
 
 - **Source**: Font Awesome 6.7.2 metadata (`metadata/icons.json` from
   `@fortawesome/fontawesome-free`)

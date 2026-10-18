@@ -7,8 +7,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use slideforge::pptd;
-use slideforge::pptx;
+use open_pptd::pptd;
+use open_pptd::pptx;
 
 fn fixture_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/buildable")

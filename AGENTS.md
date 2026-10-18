@@ -13,10 +13,10 @@
 python3 skills/open-pptd/scripts/install_binary.py
 
 # 2. 严格语义与结构校验
-slideforge check <project_dir>/deck.pptd
+pptd check <project_dir>/deck.pptd
 
 # 3. 极速编译为原生 PPTX
-slideforge build <project_dir>/deck.pptd -o <output.pptx>
+pptd build <project_dir>/deck.pptd -o <output.pptx>
 
 # 4. 成品质量与合规性验收 (无泄漏标签、页数与备注检查)
 python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages <N> --check-notes
@@ -37,7 +37,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 
 ## ⚠️ 严禁使用的非支持特性 (Feature Boundaries)
 
-以下语法目前在 `slideforge` 编译器中**不受支持**，编译器与质检脚本会**直接拦截报错**：
+以下语法目前在 `pptd` 编译器中**不受支持**，编译器与质检脚本会**直接拦截报错**：
 - ❌ **严禁使用 HTML 列表与超链接标签**：`<ul>`, `<ol>`, `<li>`, `<a>`。
   - 列表写法：使用常规段落配合文字符号（如 `• 第一点` 或 `1. 第一点`）。
   - 超链接写法：使用纯文本 URL 或在页脚使用普通文本标注来源（如 `来源: IDC (2026)`）。
@@ -52,12 +52,12 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 
 1. **下载或网络受限**：
    - `install_binary.py` 会自动回退至本地 `cargo install --git`。
-   - 若本地无 Rust 工具链，可从 Release 页面手动下载解压至 `~/.local/bin/slideforge`。
-2. **`slideforge check` 报错**：
+   - 若本地无 Rust 工具链，可从 Release 页面手动下载解压至 `~/.local/bin/pptd`。
+2. **`pptd check` 报错**：
    - 检查 `shapeName` 是否拼写错误（必须为 DrawingML 预设形状如 `roundRect`, `rect`, `ellipse`, `diamond` 等）。
    - 检查 `$color` 引用是否已在 `theme.colors` 中声明。
    - 检查图片路径是否存在（统一放置于 `assets/` 目录）。
-3. **`slideforge build` 退出码 2 (.sync.hash 覆盖保护)**：
+3. **`pptd build` 退出码 2 (.sync.hash 覆盖保护)**：
    - 说明目标 `.pptx` 在上次编译后被外部程序编辑过。若确认以 PPTD 源码为准，先 `rm <output.pptx>` 再重新 build。
 4. **`validate_pptx.py` 报错**：
    - 若报 `Leaked HTML tags`，排查源码并移除 `<ul>`/`<li>`/`<a>` 标签。

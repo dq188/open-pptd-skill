@@ -191,12 +191,12 @@ pub fn theme_xml(theme: Option<&Theme>) -> String {
     let mut x = Xml::new();
     x.start(
         "a:theme",
-        &[("xmlns:a", ns::DRAWINGML), ("name", "SlideForge")],
+        &[("xmlns:a", ns::DRAWINGML), ("name", "PPTD")],
     );
     x.start("a:themeElements", &[]);
 
     // clrScheme
-    x.start("a:clrScheme", &[("name", "SlideForge")]);
+    x.start("a:clrScheme", &[("name", "PPTD")]);
     for slot in CLR_SLOT_ORDER {
         x.start(&format!("a:{slot}"), &[]);
         x.leaf(
@@ -215,13 +215,13 @@ pub fn theme_xml(theme: Option<&Theme>) -> String {
     x.end("a:clrScheme");
 
     // fontScheme
-    x.start("a:fontScheme", &[("name", "SlideForge")]);
+    x.start("a:fontScheme", &[("name", "PPTD")]);
     emit_font_scheme(&mut x, "a:majorFont", &latin, &ea);
     emit_font_scheme(&mut x, "a:minorFont", &latin, &ea);
     x.end("a:fontScheme");
 
     // fmtScheme: standard Office default (fills / lines / effects / backgrounds).
-    x.start("a:fmtScheme", &[("name", "SlideForge")]);
+    x.start("a:fmtScheme", &[("name", "PPTD")]);
     x.start("a:fillStyleLst", &[]);
     x.start("a:solidFill", &[]);
     x.leaf("a:schemeClr", &[("val", "phClr")]);

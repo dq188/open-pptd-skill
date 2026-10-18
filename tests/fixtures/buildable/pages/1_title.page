@@ -9,7 +9,7 @@ elements:
     content:
       style: "$title"
       align: [center, middle]
-      text: Hello SlideForge
+      text: Hello PPTD
   - elementId: subtitle
     elementType: text
     bounds: [100, 290, 760, 40]

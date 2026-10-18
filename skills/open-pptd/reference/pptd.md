@@ -1023,7 +1023,7 @@ interface Cell {
 ---
 
 ### Chart (charts)
-> ⚠️ **编译器状态提示 (Compiler Notice)**：原生 PPTX 图表部件（`elementType: chart`）目前在 `slideforge` 中处于开发阶段，当前版本**尚未支持编译**。`slideforge check` 和 `build` 会主动拦截图表并报错。如需展现数据，推荐使用原生表格（`elementType: table`）或使用外部脚本将图表导出为图片后引入（`elementType: image`）。
+> ⚠️ **编译器状态提示 (Compiler Notice)**：原生 PPTX 图表部件（`elementType: chart`）目前在 `pptd` 中处于开发阶段，当前版本**尚未支持编译**。`pptd check` 和 `build` 会主动拦截图表并报错。如需展现数据，推荐使用原生表格（`elementType: table`）或使用外部脚本将图表导出为图片后引入（`elementType: image`）。
 
 
 PPTD v2's chart element follows the ECharts philosophy: **the chart top level carries no `type` field**; each `series[i].type` determines its own form. 13 series types are supported in total, laid out flat by type name, all equal in status:

@@ -1,4 +1,4 @@
-//! Command-line interface for the `slideforge` binary.
+//! Command-line interface for the `pptd` binary.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -12,10 +12,10 @@ use crate::pptx;
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "slideforge",
+    name = "pptd",
     version,
     about = "Edit and build PPTX files from the PPTD language",
-    long_about = "SlideForge parses, validates and compiles PPTD \
+    long_about = "pptd parses, validates and compiles PPTD \
                   (a YAML-based presentation DSL) into editable PPTX files."
 )]
 pub struct Cli {
@@ -245,7 +245,7 @@ fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
                 );
                 eprintln!("  building now would permanently overwrite them.");
                 eprintln!(
-                    "  fix: run `slideforge convert {} {}` first to absorb the external changes,",
+                    "  fix: run `pptd convert {} {}` first to absorb the external changes,",
                     output_path.display(),
                     project.root_dir.display()
                 );
@@ -260,7 +260,7 @@ fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
                     "  overwriting it could destroy external edits that are not in the PPTD."
                 );
                 eprintln!(
-                    "  fix: run `slideforge convert {} {}` first to make it the editable baseline,",
+                    "  fix: run `pptd convert {} {}` first to make it the editable baseline,",
                     output_path.display(),
                     project.root_dir.display()
                 );

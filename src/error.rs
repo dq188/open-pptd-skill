@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
-/// Errors produced by SlideForge.
+/// Errors produced by the PPTD compiler.
 #[derive(Debug, Error)]
 pub enum Error {
     /// A filesystem operation failed while accessing `path`.

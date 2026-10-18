@@ -52,9 +52,9 @@ Use custom fonts to strengthen expressiveness or to fill font categories the bui
 
 Note: custom fonts follow the same "exactly identical names" requirement
 
-## slideforge Native Font Resolution & Safe Fallbacks
+## pptd Native Font Resolution & Safe Fallbacks
 
-When compiling PPTD to OpenXML (`.pptx`), `slideforge` automatically maps abstract font names to physically safe, universally installed system fonts to prevent operating systems (such as macOS CoreText) from falling back to cursive handwriting fonts like `HanziPen SC` (翩翩体):
+When compiling PPTD to OpenXML (`.pptx`), `pptd` automatically maps abstract font names to physically safe, universally installed system fonts to prevent operating systems (such as macOS CoreText) from falling back to cursive handwriting fonts like `HanziPen SC` (翩翩体):
 
 | PPTD Declared Font | East Asian (`<a:ea>`) | Latin (`<a:latin>`) | Target Aesthetic |
 |---|---|---|---|

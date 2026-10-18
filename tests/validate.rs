@@ -3,8 +3,8 @@
 use std::fs;
 use std::path::Path;
 
-use slideforge::pptd;
-use slideforge::pptd::validate::validate_project;
+use open_pptd::pptd;
+use open_pptd::pptd::validate::validate_project;
 
 const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/demo/demo.pptd");
 

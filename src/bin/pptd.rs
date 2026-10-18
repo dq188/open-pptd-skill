@@ -1,5 +1,5 @@
 use clap::Parser;
-use slideforge::cli::Cli;
+use open_pptd::cli::Cli;
 
 fn main() {
     std::process::exit(Cli::parse().run());

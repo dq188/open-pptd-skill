@@ -19,8 +19,8 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use slideforge::pptd;
-use slideforge::pptx::writer::PptxWriter;
+use open_pptd::pptd;
+use open_pptd::pptx::writer::PptxWriter;
 use xmltree::{Element, XMLNode};
 
 /// Collapse `.`/`..` segments in a package-relative path.

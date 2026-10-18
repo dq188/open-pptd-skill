@@ -4,13 +4,13 @@
   "description": "Open-source, 100% offline declarative presentation engine (PPTD) with native Rust compiler and AI coding agent skill.",
   "license": "MIT",
   "author": "shiquda",
-  "homepage": "https://github.com/shiquda/open-pptd-skill#readme",
+  "homepage": "https://github.com/shiquda/open-pptd#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shiquda/open-pptd-skill.git"
+    "url": "git+https://github.com/shiquda/open-pptd.git"
   },
   "bugs": {
-    "url": "https://github.com/shiquda/open-pptd-skill/issues"
+    "url": "https://github.com/shiquda/open-pptd/issues"
   },
   "keywords": [
     "ppt",
@@ -18,7 +18,7 @@
     "slides",
     "presentation",
     "pptd",
-    "slideforge",
+    "open-pptd",
     "agent-skill",
     "codex",
     "claude-code",
@@ -27,8 +27,9 @@
   ],
   "type": "module",
   "bin": {
-    "open-pptd-skill": "bin/open-pptd-skill.js",
-    "open-pptd": "bin/open-pptd-skill.js"
+    "pptd": "bin/open-pptd-skill.js",
+    "open-pptd": "bin/open-pptd-skill.js",
+    "open-pptd-skill": "bin/open-pptd-skill.js"
   },
   "files": [
     "bin/",

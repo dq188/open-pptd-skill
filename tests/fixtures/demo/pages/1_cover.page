@@ -17,7 +17,7 @@ elements:
       style: "$body"
       align: [center, middle]
       text: |
-        <p><span style="color:#ffffff;">FY2024 · built with SlideForge</span></p>
+        <p><span style="color:#ffffff;">FY2024 · built with PPTD</span></p>
   - elementId: badge
     elementType: shape
     bounds: [420, 120, 120, 60]

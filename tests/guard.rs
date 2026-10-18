@@ -9,8 +9,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use clap::Parser as _;
-use slideforge::cli::Cli;
-use slideforge::hash;
+use open_pptd::cli::Cli;
+use open_pptd::hash;
 
 const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/buildable");
 
@@ -91,7 +91,7 @@ fn recorded_hash(work: &Path, path: &Path) -> Option<String> {
 
 fn build(work: &Path, entry: &str, out: &Path) -> i32 {
     run(&[
-        "slideforge",
+        "pptd",
         "build",
         &work.join(entry).to_string_lossy(),
         "--output",
@@ -101,7 +101,7 @@ fn build(work: &Path, entry: &str, out: &Path) -> i32 {
 
 fn convert(input: &Path, out_dir: &Path) -> i32 {
     run(&[
-        "slideforge",
+        "pptd",
         "convert",
         &input.to_string_lossy(),
         &out_dir.to_string_lossy(),

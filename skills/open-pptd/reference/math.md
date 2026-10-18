@@ -1,6 +1,6 @@
 # Math & LaTeX Formulas in PPTD
 
-`open-pptd-skill` and `slideforge` support inline LaTeX mathematics. Formulas are parsed into structured DrawingML text runs with authentic typographical formatting.
+`open-pptd-skill` and `pptd` support inline LaTeX mathematics. Formulas are parsed into structured DrawingML text runs with authentic typographical formatting.
 
 ---
 
@@ -27,7 +27,7 @@ Inline formulas are delimited by `\( ... \)` inside paragraph text:
 
 ---
 
-## Typography Rules Applied by slideforge
+## Typography Rules Applied by pptd
 
 1. **Variables**: Single-letter variables (like $s, t, A, \ell, q, h$) are automatically formatted in mathematical italics (`<a:rPr i="1">`).
 2. **Subscripts**: Subscript expressions (`_t`, `_{t+1}`, `_{\le t}`) automatically have their baseline lowered by 25% (`baseline="-25000"`) and font size scaled to 70%, preserving correct typographical proportions.

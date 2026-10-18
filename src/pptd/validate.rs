@@ -399,7 +399,7 @@ fn validate_element(
                 out,
                 page_idx,
                 format!(
-                    "chart `{}` is not supported by slideforge compiler yet (native PPTX charts are under development)",
+                    "chart `{}` is not supported by pptd compiler yet (native PPTX charts are under development)",
                     chart.common.element_id
                 ),
             );

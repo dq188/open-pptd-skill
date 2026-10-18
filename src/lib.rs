@@ -1,4 +1,4 @@
-//! SlideForge — edit and build PPTX presentations from the PPTD language.
+//! Open PPTD (`pptd`) — edit and build PPTX presentations from the PPTD language.
 //!
 //! The crate is split in two halves, mirroring the two sides of the
 //! conversion:

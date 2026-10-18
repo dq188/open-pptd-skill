@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use slideforge::pptd;
+use open_pptd::pptd;
 
 const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/demo/demo.pptd");
 
@@ -12,7 +12,7 @@ fn loads_demo_project() {
     assert_eq!(project.presentation.version, "v2");
     assert_eq!(
         project.presentation.title.as_deref(),
-        Some("SlideForge Demo")
+        Some("PPTD Demo")
     );
     assert_eq!(project.presentation.size.width, 960.0);
     assert_eq!(project.presentation.size.height, 540.0);
@@ -45,7 +45,7 @@ fn parses_element_kinds() {
 
 #[test]
 fn parses_fill_variants() {
-    use slideforge::pptd::Fill;
+    use open_pptd::pptd::Fill;
 
     let project = pptd::load_project(Path::new(FIXTURE)).unwrap();
 
@@ -89,7 +89,7 @@ fn round_trips_through_yaml() {
 
 #[test]
 fn parses_border_spec_shapes() {
-    use slideforge::pptd::{Border, BorderSpec, LineStyle};
+    use open_pptd::pptd::{Border, BorderSpec, LineStyle};
 
     let cases: &[(&str, BorderSpec)] = &[
         ("null", BorderSpec::Clear),
@@ -126,7 +126,7 @@ fn parses_border_spec_shapes() {
 
 #[test]
 fn parses_layout_extension_fields() {
-    use slideforge::pptd::{Fill, Presentation};
+    use open_pptd::pptd::{Fill, Presentation};
     let deck_yaml = "\
 version: v2
 size: [960, 540]
@@ -163,7 +163,7 @@ layouts:
 
 #[test]
 fn page_layout_and_text_placeholder_parse() {
-    use slideforge::pptd::{Element, Page};
+    use open_pptd::pptd::{Element, Page};
     let page_yaml = "\
 layout: cover
 background: {type: solid, color: \"#FFFFFF\"}
@@ -184,7 +184,7 @@ elements:
 
 #[test]
 fn flags_dangling_layout_reference() {
-    use slideforge::pptd::{Page, Presentation, Project, validate_project};
+    use open_pptd::pptd::{Page, Presentation, Project, validate_project};
     use std::path::PathBuf;
     let presentation: Presentation = serde_yaml::from_str(
         "version: v2\nsize: [960, 540]\npages: [pages/1.page]\nlayouts:\n  cover: {}\n",
@@ -208,7 +208,7 @@ fn flags_dangling_layout_reference() {
 
 #[test]
 fn accepts_valid_layout_reference() {
-    use slideforge::pptd::{Page, Presentation, Project, validate_project};
+    use open_pptd::pptd::{Page, Presentation, Project, validate_project};
     use std::path::PathBuf;
     let presentation: Presentation = serde_yaml::from_str(
         "version: v2\nsize: [960, 540]\npages: [pages/1.page]\nlayouts:\n  cover: {}\n",

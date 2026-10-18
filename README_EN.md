@@ -2,10 +2,10 @@
 
 [简体中文](README.md) | [English](README_EN.md)
 
-[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd-skill?label=release)](https://github.com/shiquda/open-pptd-skill/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd?label=release)](https://github.com/shiquda/open-pptd/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An open-source full-stack presentation suite based on the **PPTD** (Declarative Presentation Language) specification and a high-performance native Rust compiler. Integrates both the **native compiler engine (`open-pptd` / `slideforge` CLI)** and an **out-of-the-box AI Coding Agent skill (Agent Skill)** in a unified repository.
+An open-source full-stack presentation suite based on the **PPTD** (Declarative Presentation Language) specification and a high-performance native Rust compiler. Integrates both the **native compiler engine (`pptd` CLI)** and an **out-of-the-box AI Coding Agent skill (Agent Skill)** in a unified repository.
 
 Designed for AI Coding Agents (Claude Code, Codex, Cursor, WorkBuddy, Multica, etc.), **completely removing any dependency on the legacy Kimi web frontend, headless browser sessions, cookies, or cloud authentication**. Compiles and reverse-decompiles native OpenXML `.pptx` presentations 100% offline with sub-second execution speeds.
 ---
@@ -26,8 +26,7 @@ Designed for AI Coding Agents (Claude Code, Codex, Cursor, WorkBuddy, Multica, e
 ### Option 1: Automatic Binary Download (Recommended)
 
 ```bash
-# One-line curl installer for macOS and Linux:
-curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd-skill/main/skills/open-pptd/scripts/install_binary.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
 
 # Or via Python script:
 python3 skills/open-pptd/scripts/install_binary.py
@@ -37,36 +36,33 @@ python3 skills/open-pptd/scripts/install_binary.py
 
 ```bash
 # Install to local Agent environment via npm / npx:
-npx github:shiquda/open-pptd-skill install -y
+npx github:shiquda/open-pptd install -y
 
 # Or install to a specific agent directory:
-npx github:shiquda/open-pptd-skill install --target ~/.claude/skills
+npx github:shiquda/open-pptd install --target ~/.claude/skills
 ```
 ### Option 3: Compile from Source via Cargo
 
-The repository contains the complete Rust source code. You can compile and install both `open-pptd` and `slideforge` CLI tools directly:
+The repository contains the complete Rust source code. You can compile and install both `pptd` and `open-pptd` CLI tools directly:
 
 ```bash
-cargo install --git https://github.com/shiquda/open-pptd-skill.git
-```
+cargo install --git https://github.com/shiquda/open-pptd.git
 
 ---
 
 ## CLI & Workflow
 
-After installation, `open-pptd` and `slideforge` commands are identical and can be used interchangeably:
-
 ### 1. Static Syntax & Semantic Validation (`check`)
 
 ```bash
-open-pptd check deck.pptd
+pptd check deck.pptd
 ```
 
 ### 2. Compile PPTD to Native PPTX (`build`)
 
 ```bash
 # Direct CLI build:
-open-pptd build deck.pptd -o output.pptx
+pptd build deck.pptd -o output.pptx
 
 # Or via Python script wrapper:
 python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
@@ -76,7 +72,7 @@ python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 
 ```bash
 # Direct CLI convert:
-open-pptd convert existing_deck.pptx ./project_dir/
+pptd convert existing_deck.pptx ./project_dir/
 
 # Or via Python wrapper:
 python3 skills/open-pptd/scripts/convert_pptx.py existing_deck.pptx -o ./project_dir/
@@ -97,7 +93,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8
 
 ## 🔒 `.sync.hash` Overwrite Guard & Bi-directional Sync
 
-`slideforge` maintains a `.sync.hash` ledger in every project directory:
+`pptd` maintains a `.sync.hash` ledger in every project directory:
 - **Overwrite Guard**: `build` verifies the live SHA-256 of an existing target `.pptx`. If it was altered externally, `build` refuses to overwrite (exit code 2) to protect uncommitted manual work.
 - **Smart Skip**: `convert` verifies the source `.pptx` hash and skips re-conversion (`unchanged → skipped convert`) if it has not changed.
 
@@ -122,7 +118,7 @@ This project is licensed under the [MIT License](LICENSE).
 ### Acknowledgments & Upstream Attributions:
 1. **`open-kimi-ppt-skill`**:
    Originally conceived and authored by Binaryify Zhuang under the MIT License ([GitHub](https://github.com/acnlie/open-kimi-ppt-skill)). We gratefully acknowledge the pioneering work on PPTD declarative slide concepts and Agent skills.
-2. **`slideforge`**:
-   The underlying native Rust compiler engine was originally created by **meatRoll** ([`meatRoll/slideforge`](https://github.com/meatRoll/slideforge), MIT License). Further secondary development by shiquda and contributors added rich text formatting (`<u>`, `<s>`), tokenized academic LaTeX math rendering, PowerPoint speaker notes (`notesSlide`), expanded Font Awesome icon datasets, and strict semantic validation, before being fully integrated into Open PPTD. We gratefully acknowledge meatRoll's foundational work.
+2. **Native Rust Compiler Core**:
+   The underlying native Rust compiler engine was originally created by **meatRoll** ([`meatRoll/slideforge`](https://github.com/meatRoll/slideforge), MIT License). Further secondary development by shiquda and contributors added rich text formatting (`<u>`, `<s>`), tokenized academic LaTeX math rendering, PowerPoint speaker notes (`notesSlide`), expanded Font Awesome icon datasets, and strict semantic validation, before being unified into Open PPTD as the `pptd` CLI tool. We gratefully acknowledge meatRoll's foundational work.
 3. **Font Awesome 6 (Solid Icons)**:
    Vector icons embedded in the compiler are from Font Awesome 6.7.2 under CC BY 4.0 ([License](https://fontawesome.com/license/free)).

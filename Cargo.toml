@@ -6,14 +6,14 @@ rust-version = "1.85"
 description = "Declarative Presentation Engine & Agent Skill (PPTD ↔ PPTX compiler)"
 license = "MIT"
 authors = ["meatRoll", "shiquda", "open-pptd contributors"]
-repository = "https://github.com/shiquda/open-pptd-skill"
-homepage = "https://github.com/shiquda/open-pptd-skill#readme"
+repository = "https://github.com/shiquda/open-pptd"
+homepage = "https://github.com/shiquda/open-pptd#readme"
 keywords = ["pptx", "pptd", "presentation", "ooxml", "slides"]
 categories = ["command-line-utilities", "encoding"]
 readme = "README.md"
 
 [lib]
-name = "slideforge"
+name = "open_pptd"
 path = "src/lib.rs"
 
 [dependencies]

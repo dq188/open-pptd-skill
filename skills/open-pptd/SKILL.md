@@ -1,11 +1,11 @@
 ---
 name: open-pptd
-description: Create, edit, reverse-decompile, and export presentations using the open PPTD format and native slideforge compiler. For every PPT task, default deliverables are BOTH (1) a self-contained PPTD project folder (deck.pptd manifest + pages/*.page) and (2) a locally compiled native .pptx with vector shapes, connector arrows, LaTeX math formulas, speaker notes, and native tables. Completely offline — zero dependency on browser automation or cloud logins.
+description: Create, edit, reverse-decompile, and export presentations using the open PPTD format and native pptd compiler. For every PPT task, default deliverables are BOTH (1) a self-contained PPTD project folder (deck.pptd manifest + pages/*.page) and (2) a locally compiled native .pptx with vector shapes, connector arrows, LaTeX math formulas, speaker notes, and native tables. Completely offline — zero dependency on browser automation or cloud logins.
 ---
 
 # open-pptd: Native Declarative Presentation Engine
 
-`open-pptd` is an open-source presentation toolchain built around the **PPTD** (Declarative Presentation Language) specification and the high-performance **slideforge** native Rust compiler. It provides AI coding agents with a clean, modular YAML abstraction over OOXML and produces real, fully editable `.pptx` presentations offline in milliseconds.
+`open-pptd` is an open-source presentation toolchain built around the **PPTD** (Declarative Presentation Language) specification and the high-performance **pptd** native Rust compiler. It provides AI coding agents with a clean, modular YAML abstraction over OOXML and produces real, fully editable `.pptx` presentations offline in milliseconds.
 
 ---
 
@@ -19,11 +19,11 @@ python3 skills/open-pptd/scripts/install_binary.py
 # ➔ 若网络受限导致下载失败：脚本会自动回退至 cargo 源码编译；若仍失败，请根据终端提示手动下载放置
 
 # 2. 严格语义与结构校验
-slideforge check <project_dir>/deck.pptd
+pptd check <project_dir>/deck.pptd
 # ➔ 若 check 报错：根据错误提示逐一排查拼写错误、非法 shapeName、未定义 $color 或缺失的图片路径
 
 # 3. 极速编译为原生 PPTX
-slideforge build <project_dir>/deck.pptd -o <output.pptx>
+pptd build <project_dir>/deck.pptd -o <output.pptx>
 # ➔ 若因 .sync.hash 覆写守卫报错退出 (退出码 2)：说明 output.pptx 已被外部修改。若需强制覆盖，先 rm <output.pptx>
 
 # 4. 成品全面验证与质检
@@ -60,20 +60,20 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 | **表格 / Tables** | ✅ 完全支持 | 原生 PowerPoint 表格 (`<a:tbl>`)，支持 `columnWidths`、`rowHeights`、单元格跨行跨列、边框样式、底色填充 |
 | **图片与媒体** | ✅ 完全支持 | 统一存放在 `assets/` 目录；支持透明通道、裁切 `crop`、填充模式 `fit: {mode: cover/contain}`、边框与阴影 |
 | **主题色彩与继承** | ✅ 完全支持 | `theme.colors` 统一声明命名色，元素中通过 `"$colorKey"` 引用；引用未定义颜色会在 `check` 阶段拦截 |
-| **静态质检与校验** | ✅ 严格校验 | `slideforge check` 自动拦截拼写错误、非法形状名、无效色彩引用、缺失的媒体文件以及潜在文字溢出 |
+| **静态质检与校验** | ✅ 严格校验 | `pptd check` 自动拦截拼写错误、非法形状名、无效色彩引用、缺失的媒体文件以及潜在文字溢出 |
 
 ---
 
 ## 🔒 `.sync.hash` 机制与双向同步注意
 
-`slideforge` 在项目根目录使用旁车文件 `.sync.hash` 记录项目合法写入时各文件的 SHA-256 哈希：
+`pptd` 在项目根目录使用旁车文件 `.sync.hash` 记录项目合法写入时各文件的 SHA-256 哈希：
 
 1. **防覆盖守卫 (Overwrite Guard)**：
-   - 执行 `slideforge build deck.pptd -o presentation.pptx` 时，若输出文件 `presentation.pptx` 已存在，编译器会比对当前文件的实时哈希与 `.sync.hash` 的记录。
+   - 执行 `pptd build deck.pptd -o presentation.pptx` 时，若输出文件 `presentation.pptx` 已存在，编译器会比对当前文件的实时哈希与 `.sync.hash` 的记录。
    - **若文件被外部程序或人类手工编辑过**，编译器会**拒绝覆写**（退出码 2，提示 `changed after its last recorded sync point`），防止破坏未知修改。
    - **如何解决**：若确认需要以 PPTD 代码强制覆写，删除已有 `.pptx` 文件后再运行 `build` 即可。
 2. **跳过未变更的 Convert**：
-   - 执行 `slideforge convert presentation.pptx output_dir/` 时，若源 PPTX 的 SHA-256 与上次记录一致，编译器将自动输出 `unchanged → skipped convert` 并跳过，保护本地已有的 PPTD 源码不被重复覆写。
+   - 执行 `pptd convert presentation.pptx output_dir/` 时，若源 PPTX 的 SHA-256 与上次记录一致，编译器将自动输出 `unchanged → skipped convert` 并跳过，保护本地已有的 PPTD 源码不被重复覆写。
 
 ---
 
@@ -81,7 +81,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 
 除非用户明确声明不需要，每个 PPT 制作或修改任务必须交付：
 1. **可编辑的 PPTD 源码工程**：包含 `deck.pptd` 清单文件、`pages/*.page` 页面描述、以及 `assets/` 资源目录。
-2. **编译出的原生 `.pptx` 成品**：通过 `slideforge build` 生成。
+2. **编译出的原生 `.pptx` 成品**：通过 `pptd build` 生成。
 3. **质检通过报告**：通过 `validate_pptx.py` 验证无遗漏标签和结构异常。
 
 ---
@@ -158,23 +158,23 @@ python3 skills/open-pptd/scripts/install_binary.py
 
 ### 2. 严格语义检查 (Check)
 ```bash
-slideforge check deck.pptd
+pptd check deck.pptd
 ```
 
 ### 3. 编译工程为 PPTX (Build)
 ```bash
-# 推荐直接使用 slideforge:
-slideforge build deck.pptd -o output.pptx
+# 推荐直接使用 pptd:
+pptd build deck.pptd -o output.pptx
 
 # 或通过 Python 包装脚本:
 python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 ```
 
 ### 4. 逆向反编译 PPTX 为 PPTD 工程 (Convert)
-注意：`slideforge convert` 接收两个位置参数，**不要加 `-o` 参数**：
+注意：`pptd convert` 接收两个位置参数，**不要加 `-o` 参数**：
 ```bash
-# 原生命令格式: slideforge convert <INPUT.pptx> <OUTPUT_DIR>
-slideforge convert input.pptx my_project_dir/
+# 原生命令格式: pptd convert <INPUT.pptx> <OUTPUT_DIR>
+pptd convert input.pptx my_project_dir/
 
 # 或通过 Python 包装脚本:
 python3 skills/open-pptd/scripts/convert_pptx.py input.pptx -o my_project_dir/

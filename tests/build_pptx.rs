@@ -4,8 +4,8 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use slideforge::pptd;
-use slideforge::pptx::writer::PptxWriter;
+use open_pptd::pptd;
+use open_pptd::pptx::writer::PptxWriter;
 
 const BUILDABLE: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -14,7 +14,7 @@ const BUILDABLE: &str = concat!(
 
 fn out_path(tag: &str) -> PathBuf {
     std::env::temp_dir().join(format!(
-        "slideforge-build-{tag}-{}.pptx",
+        "pptd-build-{tag}-{}.pptx",
         std::process::id()
     ))
 }
@@ -68,7 +68,7 @@ fn buildable_deck_produces_a_complete_package() {
 
     // Slide content sanity: text, shape, line, icon, image and the fade.
     let slide = read_zip_part(&path, "ppt/slides/slide1.xml");
-    assert!(slide.contains("Hello SlideForge"), "slide text missing");
+    assert!(slide.contains("Hello PPTD"), "slide text missing");
     assert!(slide.contains("roundRect"), "shape missing");
     assert!(slide.contains("cxnSp"), "line missing");
     assert!(slide.contains("cubicBezTo"), "icon geometry missing");
@@ -137,7 +137,7 @@ fn content_types_cover_every_typed_part() {
 fn rich_text_renders_instead_of_failing() {
     // PPTD rich text (`<p>`/`<span style>`/`<strong>`) is a supported feature
     // now: the subtitle must render as styled runs, not fail.
-    let work = std::env::temp_dir().join("slideforge-rich-text");
+    let work = std::env::temp_dir().join("pptd-rich-text");
     let _ = fs::create_dir_all(work.join("pages"));
     fs::write(
         work.join("deck.pptd"),
@@ -151,7 +151,7 @@ fn rich_text_renders_instead_of_failing() {
     elementType: text
     bounds: [40, 40, 800, 60]
     content:
-      text: <p><span style="color:#ffffff;">FY2024 · built with SlideForge</span> and <strong>bold</strong></p>
+      text: <p><span style="color:#ffffff;">FY2024 · built with PPTD</span> and <strong>bold</strong></p>
 "#,
     )
     .unwrap();
@@ -169,7 +169,7 @@ fn rich_text_renders_instead_of_failing() {
     std::io::Read::read_to_string(&mut slide, &mut xml).unwrap();
     assert!(!xml.contains("<p>"), "raw markup leaked into the slide");
     assert!(
-        xml.contains("FY2024") && xml.contains("built with SlideForge") && xml.contains("bold"),
+        xml.contains("FY2024") && xml.contains("built with PPTD") && xml.contains("bold"),
         "subtitle text missing or mangled"
     );
     assert!(
@@ -200,7 +200,7 @@ elements:
       - type: bar
         encode: {x: a, y: b}
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-build-chart-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-build-chart-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -277,7 +277,7 @@ elements:
     arrow: [arrow, stealth]
     border: {style: solid, width: 2, color: "#FF0000"}
 "##;
-    let dir = std::env::temp_dir().join(format!("slideforge-line-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-line-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -332,7 +332,7 @@ elements:
       fontFamily: MiSans
       text: "测试安全字体回退"
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-font-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-font-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -389,7 +389,7 @@ elements:
       fontFamily: 思源宋体
       text: "测试宋体安全回退"
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-serif-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-serif-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -440,7 +440,7 @@ elements:
       text: |
         <p>公式 \(h(s_t) \ge 0\)</p>
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-math-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-math-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -479,7 +479,7 @@ elements:
       text: |
         <p>强调 <i>\(x + y\)</i> 和普通 \(z\)</p>
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-math-it-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-math-it-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();
@@ -521,7 +521,7 @@ elements:
     content:
       text: <p>Slide with notes</p>
 "#;
-    let dir = std::env::temp_dir().join(format!("slideforge-notes-test-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("pptd-notes-test-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(dir.join("pages")).unwrap();
     fs::write(dir.join("deck.pptd"), deck).unwrap();

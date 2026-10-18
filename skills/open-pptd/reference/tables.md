@@ -1,8 +1,8 @@
-# Native Tables in PPTD & slideforge
+# Native Tables in PPTD & pptd
 
 `open-pptd-skill` supports full native PowerPoint tables (`<a:tbl>`), with bi-directional support:
-1. **Forward compilation**: `slideforge build` compiles PPTD `elementType: table` into a native OpenXML table `graphicFrame`.
-2. **Reverse decompilation**: `slideforge convert` extracts PPTX tables back into clean PPTD YAML.
+1. **Forward compilation**: `pptd build` compiles PPTD `elementType: table` into a native OpenXML table `graphicFrame`.
+2. **Reverse decompilation**: `pptd convert` extracts PPTX tables back into clean PPTD YAML.
 
 ---
 

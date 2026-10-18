@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Offline image export and multi-page preview montage for PPTD projects.
 
-Uses the native slideforge compiler + headless document renderer to generate
+Uses the native pptd compiler + headless document renderer to generate
 high-resolution PNG images of every slide and a unified grid overview,
 without requiring any browser automation, token authentication, or cloud services.
 """

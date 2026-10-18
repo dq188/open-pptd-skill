@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cross-build slideforge for all platforms the skill dispatcher supports.
+# Cross-build pptd for all platforms the skill dispatcher supports.
 #
 # Prerequisites (one-time):
 #   1. rustup with std for every target:
@@ -41,15 +41,13 @@ for t in "${TARGETS[@]}"; do
 done
 
 if [[ "${1:-}" == "--install" ]]; then
-  BIN=skill/slideforge-ppt/bin
-  cp target/aarch64-apple-darwin/release/slideforge      "$BIN/slideforge-aarch64-apple-darwin"
-  cp target/x86_64-apple-darwin/release/slideforge       "$BIN/slideforge-x86_64-apple-darwin"
-  cp target/x86_64-unknown-linux-gnu/release/slideforge  "$BIN/slideforge-x86_64-unknown-linux-gnu"
-  cp target/aarch64-unknown-linux-gnu/release/slideforge "$BIN/slideforge-aarch64-unknown-linux-gnu"
-  # The dispatcher probes the msvc triple on Windows; the zig-built GNU exe
-  # (static CRT via zig) runs on any x86_64 Windows 10+, so land it there.
-  cp target/x86_64-pc-windows-gnu/release/slideforge.exe "$BIN/slideforge-x86_64-pc-windows-msvc.exe"
+  BIN=skills/open-pptd/bin
+  mkdir -p "$BIN"
+  cp target/aarch64-apple-darwin/release/pptd      "$BIN/pptd-aarch64-apple-darwin"
+  cp target/x86_64-apple-darwin/release/pptd       "$BIN/pptd-x86_64-apple-darwin"
+  cp target/x86_64-unknown-linux-gnu/release/pptd  "$BIN/pptd-x86_64-unknown-linux-gnu"
+  cp target/aarch64-unknown-linux-gnu/release/pptd "$BIN/pptd-aarch64-unknown-linux-gnu"
+  cp target/x86_64-pc-windows-gnu/release/pptd.exe "$BIN/pptd-x86_64-pc-windows-msvc.exe"
   echo "== installed into $BIN:"
   ls -la "$BIN"
-  file "$BIN"/slideforge-* | sed 's/, for Mac.*//;s/, for free.*//;s/, version.*//'
 fi

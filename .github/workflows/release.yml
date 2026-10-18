@@ -17,19 +17,19 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            archive: slideforge-$TAG-x86_64-linux.tar.gz
+            archive: pptd-$TAG-x86_64-linux.tar.gz
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
-            archive: slideforge-$TAG-aarch64-linux.tar.gz
+            archive: pptd-$TAG-aarch64-linux.tar.gz
           - target: x86_64-apple-darwin
             os: macos-latest
-            archive: slideforge-$TAG-x86_64-macos.tar.gz
+            archive: pptd-$TAG-x86_64-macos.tar.gz
           - target: aarch64-apple-darwin
             os: macos-latest
-            archive: slideforge-$TAG-aarch64-macos.tar.gz
+            archive: pptd-$TAG-aarch64-macos.tar.gz
           - target: x86_64-pc-windows-msvc
             os: windows-latest
-            archive: slideforge-$TAG-x86_64-windows.zip
+            archive: pptd-$TAG-x86_64-windows.zip
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +56,7 @@ jobs:
           VERSION=${GITHUB_REF_NAME#v}
           ARCHIVE=${ARCHIVE/\$TAG/$VERSION}
           mkdir -p dist
-          cp "target/$TARGET/release/slideforge" dist/
+          cp "target/$TARGET/release/pptd" dist/
           cp "target/$TARGET/release/open-pptd" dist/ 2>/dev/null || true
           cp README.md LICENSE* dist/ 2>/dev/null || true
           tar -czf "$ARCHIVE" -C dist .
@@ -72,7 +72,7 @@ jobs:
           $version = $env:GITHUB_REF_NAME.Substring(1)
           $archive = $env:ARCHIVE.Replace('$TAG', $version)
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item "target/$($env:TARGET)/release/slideforge.exe" dist/
+          Copy-Item "target/$($env:TARGET)/release/pptd.exe" dist/
           if (Test-Path "target/$($env:TARGET)/release/open-pptd.exe") { Copy-Item "target/$($env:TARGET)/release/open-pptd.exe" dist/ }
           if (Test-Path README.md) { Copy-Item README.md dist/ }
           if (Test-Path LICENSE) { Copy-Item LICENSE dist/ }

@@ -1,6 +1,6 @@
-# slideforge CLI Reference
+# pptd CLI Reference
 
-`slideforge` is the native compiler toolchain for PPTD presentations.
+`pptd` is the native compiler toolchain for PPTD presentations.
 
 ---
 
@@ -15,15 +15,15 @@ curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd-skill/main/skills
 
 ### From Source (via Cargo)
 ```bash
-cargo install --git https://github.com/shiquda/slideforge.git
+cargo install --git https://github.com/shiquda/pptd.git
 ```
 
 ---
-### `slideforge check`
+### `pptd check`
 Performs strict semantic and structural validation of a PPTD project without building.
 
 ```bash
-slideforge check <MANIFEST>
+pptd check <MANIFEST>
 ```
 
 Checks for:
@@ -40,11 +40,11 @@ Checks for:
 
 ## Commands
 
-### `slideforge build`
+### `pptd build`
 Compiles a PPTD manifest into a native OpenXML `.pptx` presentation.
 
 ```bash
-slideforge build <MANIFEST> [OPTIONS]
+pptd build <MANIFEST> [OPTIONS]
 ```
 
 **Arguments:**
@@ -55,16 +55,16 @@ slideforge build <MANIFEST> [OPTIONS]
 
 **Example:**
 ```bash
-slideforge build deck.pptd -o my_slides.pptx
+pptd build deck.pptd -o my_slides.pptx
 ```
 
 ---
 
-### `slideforge convert`
+### `pptd convert`
 Decompiles an existing PowerPoint `.pptx` file into a clean, editable PPTD project.
 
 ```bash
-slideforge convert <INPUT_PPTX> <OUTPUT_DIR>
+pptd convert <INPUT_PPTX> <OUTPUT_DIR>
 ```
 
 **Arguments:**
@@ -73,14 +73,14 @@ slideforge convert <INPUT_PPTX> <OUTPUT_DIR>
 
 **Example:**
 ```bash
-slideforge convert input.pptx ./project_dir
+pptd convert input.pptx ./project_dir
 ```
 
 ---
 
-### `slideforge dump`
+### `pptd dump`
 Dumps a diagnostic summary of the parsed project structure and element counts to stdout.
 
 ```bash
-slideforge dump <MANIFEST>
+pptd dump <MANIFEST>
 ```
