@@ -622,12 +622,12 @@ interface TextContent {
 | `<em>` | Italic | `<em>emphasis</em>` |
 | `<u>` | Underline | `<u>underline</u>` |
 | `<s>` | Strikethrough | `<s>deleted</s>` |
-| `<sup>` | Superscript | `E=mc<sup>2</sup>` |
-| `<sub>` | Subscript | `H<sub>2</sub>O` |
-| `<a>` | Hyperlink; supports `https://`, `http://`, `mailto:`; once set, the hyperlink text style (blue with underline) is applied automatically | `<a href="https://x.com">link</a>` |
-| `<ul>` | Unordered list | `<ul><li>item</li></ul>` |
-| `<ol>` | Ordered list | `<ol><li>first item</li></ol>` |
-| `<li>` | List item; must be used together with `<ul>` or `<ol>` | — |
+| `<sup>` | *(暂不支持 / Unsupported)* 上标，请使用 LaTeX 公式 `\( x^2 \)` 代替 | — |
+| `<sub>` | *(暂不支持 / Unsupported)* 下标，请使用 LaTeX 公式 `\( x_i \)` 代替 | — |
+| `<a>` | *(暂不支持 / Unsupported)* 超链接，编译器会报错拦截，请使用纯文本 URL 或脚注声明 | — |
+| `<ul>` | *(暂不支持 / Unsupported)* 无序列表，编译器会报错拦截，请直接在段落中写项目符号 `•` | — |
+| `<ol>` | *(暂不支持 / Unsupported)* 有序列表，编译器会报错拦截，请直接在段落中写序号 `1.` | — |
+| `<li>` | *(暂不支持 / Unsupported)* 列表项，编译器会报错拦截 | — |
 
 **style attribute mapping**
 
@@ -1023,6 +1023,8 @@ interface Cell {
 ---
 
 ### Chart (charts)
+> ⚠️ **编译器状态提示 (Compiler Notice)**：原生 PPTX 图表部件（`elementType: chart`）目前在 `slideforge` 中处于开发阶段，当前版本**尚未支持编译**。`slideforge check` 和 `build` 会主动拦截图表并报错。如需展现数据，推荐使用原生表格（`elementType: table`）或使用外部脚本将图表导出为图片后引入（`elementType: image`）。
+
 
 PPTD v2's chart element follows the ECharts philosophy: **the chart top level carries no `type` field**; each `series[i].type` determines its own form. 13 series types are supported in total, laid out flat by type name, all equal in status:
 

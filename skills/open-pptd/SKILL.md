@@ -1,29 +1,46 @@
 ---
-name: open-pptd-skill
+name: open-pptd
 description: Create, edit, reverse-decompile, and export presentations using the open PPTD format and native slideforge compiler. For every PPT task, default deliverables are BOTH (1) a self-contained PPTD project folder (deck.pptd manifest + pages/*.page) and (2) a locally compiled native .pptx with vector shapes, connector arrows, LaTeX math formulas, speaker notes, and native tables. Completely offline — zero dependency on browser automation or cloud logins.
 ---
 
-# open-pptd-skill: Native Declarative Presentation Engine
+# open-pptd: Native Declarative Presentation Engine
 
-`open-pptd-skill` is an open-source presentation toolchain built around the **PPTD** (Declarative Presentation Language) specification and the high-performance **slideforge** native Rust compiler. It provides AI coding agents with a clean, modular YAML abstraction over OOXML and produces real, fully editable `.pptx` presentations offline in milliseconds.
+`open-pptd` is an open-source presentation toolchain built around the **PPTD** (Declarative Presentation Language) specification and the high-performance **slideforge** native Rust compiler. It provides AI coding agents with a clean, modular YAML abstraction over OOXML and produces real, fully editable `.pptx` presentations offline in milliseconds.
 
 ---
 
-## ⚡ Agent Quickstart (3 步极速开工)
+## ⚡ Agent Quickstart (极速闭环与失败处理)
 
-Agent 接到任何 PPT 创建或修改任务后，直接按以下标准 3 步闭环执行：
+Agent 接到任何 PPT 制作或修改任务后，必须遵循以下闭环命令链：
 
 ```bash
-# 1. 确保 slideforge 本地编译器就绪 (已安装即刻返回，未安装则自动下载或编译)
+# 1. 安装与就绪检查 (已安装即刻返回)
 python3 skills/open-pptd/scripts/install_binary.py
+# ➔ 若网络受限导致下载失败：脚本会自动回退至 cargo 源码编译；若仍失败，请根据终端提示手动下载放置
 
-# 2. 编写或修改 PPTD 源码后，运行严格语义校验 (检查字段、颜色、$token、图片存在性、溢出)
+# 2. 严格语义与结构校验
 slideforge check <project_dir>/deck.pptd
+# ➔ 若 check 报错：根据错误提示逐一排查拼写错误、非法 shapeName、未定义 $color 或缺失的图片路径
 
-# 3. 编译并使用质检脚本验收 (检查页数、无遗漏HTML标签、备注完整性、溢出检测)
+# 3. 极速编译为原生 PPTX
 slideforge build <project_dir>/deck.pptd -o <output.pptx>
-python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages <N>
+# ➔ 若因 .sync.hash 覆写守卫报错退出 (退出码 2)：说明 output.pptx 已被外部修改。若需强制覆盖，先 rm <output.pptx>
+
+# 4. 成品全面验证与质检
+python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages <N> --check-notes
+# ➔ 若报 leaked HTML tag：检查源码中是否有未转换的 <ul>/<li>/<a> 标签，改用普通文本段落与标号
 ```
+
+---
+
+## 📚 Agent 必读顺序 (Document Reading Order)
+
+在动手编写 PPTD 代码前，建议严格按照以下顺序查阅相关规范：
+1. **场景判断**：阅读 `reference/slides_categories.md`，判断文稿归属的业务场景（咨询/汇报/学术/技术等）与核心叙事目标。
+2. **版式与密度红线**：根据场景阅读 `reference/slides_categories/<scenario>.md`，掌握信息密度、禁止项与推荐版式结构。
+3. **预设主题选择**：查阅 `theme.md`（英文参见 `theme_EN.md`），直接点名或参考其中 30 余种精美的主题调色盘与版式规范。
+4. **跨平台字体回退**：查阅 `reference/fonts.md`，了解 Windows / macOS / Linux 字体映射机制，避免字体缺失导致错乱。
+5. **语法与能力边界**：查阅下文的【功能支持矩阵】以及 `reference/pptd.md`（注意：仅使用编译器已支持的能力）。
 
 ---
 
@@ -184,3 +201,16 @@ python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8
 4. **多媒体与图片 (Assets)**：
    - 所有图片均应放置在工程的 `assets/` 文件夹下，禁止直接散落在根目录。
    - 严禁在页面文件中将图片路径写为绝对路径，统一写为相对工程根目录的路径（如 `assets/banner.png`）。
+
+---
+
+## 💻 运行环境与依赖声明
+
+1. **Python 环境要求**：
+   - Python ≥ 3.9。
+   - 核心构建无外部 Python 库硬依赖（标准库即可驱动）。
+   - 可选高级功能依赖见 `skills/open-pptd/scripts/requirements.txt`：
+     - `Pillow`：用于多页全景预览图拼接 (`export_images.py`)。
+     - 系统级 `libreoffice` / `soffice` / `pdftoppm`：用于在无 macOS 视窗环境下进行 PPTX 到 PDF 及高分辨率 PNG 的无头渲染。
+2. **Linux 下渲染字体替换注意**：
+   - 在 Linux 无头服务器环境下使用 LibreOffice 进行图片导出时，若系统未安装中文字体（如思源宋体、微软雅黑），LibreOffice 会回退为本地通用字体，可能引起微小的中西文间距和文本换行差异。推荐在最终阅读端（Windows Office / macOS Keynote）查看真实效果。

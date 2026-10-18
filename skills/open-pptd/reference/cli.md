@@ -78,9 +78,9 @@ slideforge convert input.pptx ./project_dir
 
 ---
 
-### `slideforge inspect`
-Prints structured metadata and AST statistics about a PPTD project or PPTX file.
+### `slideforge dump`
+Dumps a diagnostic summary of the parsed project structure and element counts to stdout.
 
 ```bash
-slideforge inspect <PATH>
+slideforge dump <MANIFEST>
 ```

@@ -1,0 +1,113 @@
+pageType: content
+background: { type: solid, color: "$paper" }
+notes: |
+  Starter 页面演示：包含标准页眉、双栏数据表格、带箭头的连接线、图标与标准页脚。
+elements:
+  # Header Title
+  - elementId: header-title
+    elementType: text
+    bounds: [60, 40, 840, 36]
+    content:
+      style: "$title"
+      text: "极简 Starter 标杆模版"
+
+  # Header Subtitle
+  - elementId: header-subtitle
+    elementType: text
+    bounds: [60, 78, 840, 24]
+    content:
+      style: "$subtitle"
+      text: "开箱即用的声明式元素组合：页眉、数据表格、箭头连线、形状与页脚"
+
+  # Header separator line
+  - elementId: header-line
+    elementType: line
+    bounds: [60, 110, 840, 2]
+    points: "0,0 840,0"
+    border: { style: solid, width: 1, color: "$border" }
+
+  # Card Background Shape
+  - elementId: card-bg
+    elementType: shape
+    shapeName: "roundRect"
+    bounds: [60, 130, 390, 320]
+    fill: { type: solid, color: "$surface" }
+    border: { style: solid, width: 1, color: "$border" }
+
+  # Card Title with Icon
+  - elementId: card-icon
+    elementType: icon
+    iconName: "fa-cubes"
+    bounds: [85, 155, 24, 24]
+    fill: { type: solid, color: "$primary" }
+
+  - elementId: card-title
+    elementType: text
+    bounds: [118, 153, 310, 28]
+    content:
+      fontSize: 18
+      bold: true
+      color: "$primary"
+      text: "核心优势矩阵"
+
+  # Card Content
+  - elementId: card-desc
+    elementType: text
+    bounds: [85, 195, 340, 230]
+    content:
+      style: "$body"
+      text: |
+        • <b>100% 本地离线</b>：毫秒级完成 OpenXML 构建
+        • <b>富文本排版</b>：支持 <u>下划线</u> 与 <s>删除线</s>
+        • <b>原生 DrawingML</b>：矢量无损，支持二次编辑
+        • <b>演讲者备注</b>：全自动生成 notesSlide 节点
+
+  # Table
+  - elementId: data-table
+    elementType: table
+    bounds: [480, 130, 420, 250]
+    columnWidths: [0.35, 0.35, 0.3]
+    rowHeights: [0.25, 0.25, 0.25, 0.25]
+    style:
+      firstRowStyle:
+        fill: { type: solid, color: "$cardBg" }
+        color: "$primary"
+        bold: true
+    rows:
+      - - text: "指标维度"
+        - text: "传统方案"
+        - text: "PPTD 方案"
+      - - text: "依赖项"
+        - text: "无头浏览器 / Node"
+        - text: "单二进制文件"
+      - - text: "构建耗时"
+        - text: "5 ~ 15 秒"
+        - text: "< 0.05 秒"
+      - - text: "二次编辑"
+        - text: "容易错位"
+        - text: "完美支持"
+
+  # Connecting Line with Arrow
+  - elementId: flow-arrow
+    elementType: line
+    bounds: [480, 410, 420, 20]
+    points: "0,10 410,10"
+    arrow: [null, "triangle"]
+    border: { style: solid, width: 2, color: "$accent" }
+
+  # Footer Left (Source note)
+  - elementId: footer-source
+    elementType: text
+    bounds: [60, 495, 600, 20]
+    content:
+      style: "$footer"
+      text: "来源：open-pptd-skill 官方基准测试规范 (2026)"
+
+  # Footer Right (Page number)
+  - elementId: footer-page
+    elementType: text
+    bounds: [800, 495, 100, 20]
+    content:
+      style: "$footer"
+      align: [right, middle]
+      text: "01"
