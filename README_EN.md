@@ -1,14 +1,13 @@
-# open-pptd-skill
+# Open PPTD (`open-pptd`)
 
 [简体中文](README.md) | [English](README_EN.md)
 
-[![GitHub Release](https://img.shields.io/github/v/release/shiquda/slideforge?label=slideforge)](https://github.com/shiquda/slideforge/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd-skill?label=release)](https://github.com/shiquda/open-pptd-skill/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An open-source full-stack presentation toolchain based on the **PPTD** (Declarative Presentation Language) specification and the high-performance native Rust compiler **slideforge**.
+An open-source full-stack presentation suite based on the **PPTD** (Declarative Presentation Language) specification and a high-performance native Rust compiler. Integrates both the **native compiler engine (`open-pptd` / `slideforge` CLI)** and an **out-of-the-box AI Coding Agent skill (Agent Skill)** in a unified repository.
 
 Designed for AI Coding Agents (Claude Code, Codex, Cursor, WorkBuddy, Multica, etc.), **completely removing any dependency on the legacy Kimi web frontend, headless browser sessions, cookies, or cloud authentication**. Compiles and reverse-decompiles native OpenXML `.pptx` presentations 100% offline with sub-second execution speeds.
-
 ---
 
 ## Key Features
@@ -37,43 +36,50 @@ python3 skills/open-pptd/scripts/install_binary.py
 ### Option 2: Register Skill for AI Agents
 
 ```bash
-# Non-interactive install to shared skills directory:
-npx open-pptd-skill install -y
-
-# Or install directly via GitHub repository:
+# Install to local Agent environment via npm / npx:
 npx github:shiquda/open-pptd-skill install -y
 
 # Or install to a specific agent directory:
-npx open-pptd-skill install --target ~/.claude/skills
+npx github:shiquda/open-pptd-skill install --target ~/.claude/skills
 ```
 ### Option 3: Compile from Source via Cargo
 
+The repository contains the complete Rust source code. You can compile and install both `open-pptd` and `slideforge` CLI tools directly:
+
 ```bash
-cargo install --git https://github.com/shiquda/slideforge.git
+cargo install --git https://github.com/shiquda/open-pptd-skill.git
 ```
 
 ---
 
 ## CLI & Workflow
 
-### 1. Compile PPTD to Native PPTX (`build`)
+After installation, `open-pptd` and `slideforge` commands are identical and can be used interchangeably:
+
+### 1. Static Syntax & Semantic Validation (`check`)
 
 ```bash
-# Direct slideforge CLI:
-slideforge build deck.pptd -o output.pptx
+open-pptd check deck.pptd
+```
 
-# Or via Python wrapper:
+### 2. Compile PPTD to Native PPTX (`build`)
+
+```bash
+# Direct CLI build:
+open-pptd build deck.pptd -o output.pptx
+
+# Or via Python script wrapper:
 python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 ```
 
-### 2. Decompile Existing PPTX to PPTD (`convert`)
+### 3. Decompile Existing PPTX to PPTD (`convert`)
 
 ```bash
-# Positional arguments: input presentation and output directory (no -o flag):
-slideforge convert input.pptx ./project_dir/
+# Direct CLI convert:
+open-pptd convert existing_deck.pptx ./project_dir/
 
 # Or via Python wrapper:
-python3 skills/open-pptd/scripts/convert_pptx.py input.pptx -o ./project_dir/
+python3 skills/open-pptd/scripts/convert_pptx.py existing_deck.pptx -o ./project_dir/
 ```
 ### 3. Image Slices & Overview Montage (`export_images`)
 
@@ -109,6 +115,14 @@ Detailed specifications are available under `skills/open-pptd/reference/`:
 
 ---
 
-## License
+## License & Attribution
 
 This project is licensed under the [MIT License](LICENSE).
+
+### Acknowledgments & Upstream Attributions:
+1. **`open-kimi-ppt-skill`**:
+   Originally conceived and authored by Binaryify Zhuang under the MIT License ([GitHub](https://github.com/acnlie/open-kimi-ppt-skill)). We gratefully acknowledge the pioneering work on PPTD declarative slide concepts and Agent skills.
+2. **`slideforge`**:
+   Merged and integrated from the high-performance native Rust compiler engine authored by shiquda under the MIT License ([GitHub](https://github.com/shiquda/slideforge)).
+3. **Font Awesome 6 (Solid Icons)**:
+   Vector icons embedded in the compiler are from Font Awesome 6.7.2 under CC BY 4.0 ([License](https://fontawesome.com/license/free)).

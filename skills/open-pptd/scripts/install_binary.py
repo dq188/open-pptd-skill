@@ -24,7 +24,8 @@ import zipfile
 from pathlib import Path
 from typing import Optional, Tuple
 
-REPO = "shiquda/slideforge"
+REPO = "shiquda/open-pptd-skill"
+REPO_CANDIDATES = ["shiquda/open-pptd", "shiquda/open-pptd-skill", "shiquda/slideforge"]
 VERSION = "1.0.4"
 
 
@@ -84,24 +85,27 @@ def find_slideforge() -> Optional[Path]:
 
 
 def fetch_checksums(version: str) -> dict[str, str]:
-    """Fetch SHA256SUMS.txt from GitHub release if available."""
-    sums_url = f"https://github.com/{REPO}/releases/download/v{version}/SHA256SUMS.txt"
-    req = urllib.request.Request(
-        sums_url,
-        headers={"User-Agent": "open-pptd-skill-installer/1.0"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            text = resp.read().decode("utf-8", errors="replace")
-            checksums = {}
-            for line in text.splitlines():
-                parts = line.strip().split()
-                if len(parts) >= 2:
-                    h, name = parts[0], parts[1].lstrip("*")
-                    checksums[name] = h
-            return checksums
-    except Exception:
-        return {}
+    """Fetch SHA256SUMS.txt from candidate GitHub releases if available."""
+    for repo in REPO_CANDIDATES:
+        sums_url = f"https://github.com/{repo}/releases/download/v{version}/SHA256SUMS.txt"
+        req = urllib.request.Request(
+            sums_url,
+            headers={"User-Agent": "open-pptd-skill-installer/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                text = resp.read().decode("utf-8", errors="replace")
+                checksums = {}
+                for line in text.splitlines():
+                    parts = line.strip().split()
+                    if len(parts) >= 2:
+                        h, name = parts[0], parts[1].lstrip("*")
+                        checksums[name] = h
+                if checksums:
+                    return checksums
+        except Exception:
+            continue
+    return {}
 
 
 def install_from_release(dest_dir: Path, version: str = VERSION) -> Path:
@@ -113,27 +117,31 @@ def install_from_release(dest_dir: Path, version: str = VERSION) -> Path:
         )
 
     target, archive_name = target_info
-    url = f"https://github.com/{REPO}/releases/download/v{version}/{archive_name}"
-    print(f"[open-pptd-skill] Downloading prebuilt slideforge v{version} for {target}...")
-    print(f"[open-pptd-skill] URL: {url}")
+    data = None
+    last_err = None
+    success_repo = None
 
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "open-pptd-skill-installer/1.0"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
-    except urllib.error.HTTPError as err:
-        raise RuntimeError(
-            f"Failed to download prebuilt binary (HTTP {err.code}: {err.reason}). "
-            f"Release asset '{archive_name}' may not be published yet for v{version}."
-        ) from err
-    except urllib.error.URLError as err:
-        raise RuntimeError(
-            f"Network connection failed while downloading {url}: {err.reason}"
-        ) from err
+    for repo in REPO_CANDIDATES:
+        url = f"https://github.com/{repo}/releases/download/v{version}/{archive_name}"
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "open-pptd-skill-installer/1.0"},
+        )
+        try:
+            print(f"[open-pptd-skill] Attempting to download prebuilt binary from {repo}...")
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+                success_repo = repo
+                print(f"[open-pptd-skill] Successfully downloaded from {url}")
+                break
+        except Exception as err:
+            last_err = err
+            continue
 
+    if data is None:
+        raise RuntimeError(
+            f"Failed to download prebuilt binary '{archive_name}' for v{version} from candidate repositories {REPO_CANDIDATES}: {last_err}"
+        )
     # SHA256 checksum verification
     expected_sums = fetch_checksums(version)
     if archive_name in expected_sums:

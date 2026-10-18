@@ -1,0 +1,336 @@
+//! Integration tests: semantic validation of loaded PPTD projects.
+
+use std::fs;
+use std::path::Path;
+
+use slideforge::pptd;
+use slideforge::pptd::validate::validate_project;
+
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/demo/demo.pptd");
+
+/// Write a minimal deck into a unique temp directory and return the entry path.
+fn tmp_deck(tag: &str, deck_yaml: &str, pages: &[(&str, &str)]) -> String {
+    let dir = std::env::temp_dir().join(format!("slideforge-test-{tag}-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(dir.join("pages")).unwrap();
+    fs::write(dir.join("deck.pptd"), deck_yaml).unwrap();
+    for (name, body) in pages {
+        fs::write(dir.join("pages").join(name), body).unwrap();
+    }
+    dir.join("deck.pptd").to_string_lossy().into_owned()
+}
+
+const MINIMAL_DECK: &str = "version: v2\nsize: [960, 540]\npages:\n  - pages/p.page\n";
+
+#[test]
+fn demo_fixture_reports_unsupported_chart() {
+    let project = pptd::load_project(Path::new(FIXTURE)).unwrap();
+    let issues = validate_project(&project);
+    assert_eq!(
+        issues.len(),
+        1,
+        "demo fixture contains 1 unsupported chart: {issues:?}"
+    );
+    assert!(issues[0].message.contains("chart `trend` is not supported"));
+}
+
+#[test]
+fn duplicate_element_id_is_reported() {
+    let page = r#"
+elements:
+  - elementId: a
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    content: {text: first}
+  - elementId: a
+    elementType: text
+    bounds: [0, 60, 100, 50]
+    content: {text: second}
+"#;
+    let entry = tmp_deck("dup-id", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("duplicate elementId")),
+        "expected a duplicate-elementId finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn non_positive_bounds_are_reported() {
+    let page = r#"
+elements:
+  - elementId: bad
+    elementType: text
+    bounds: [0, 0, 0, 50]
+    content: {text: nope}
+"#;
+    let entry = tmp_deck("zero-bounds", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("positive width and height")),
+        "expected a bounds finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn missing_theme_reference_is_reported() {
+    let page = r#"
+elements:
+  - elementId: t
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    content:
+      style: "$nope"
+      text: hi
+"#;
+    let entry = tmp_deck("missing-style", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("theme.textStyles")),
+        "expected a style-reference finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn chart_row_length_mismatch_is_reported() {
+    let page = r#"
+elements:
+  - elementId: c
+    elementType: chart
+    bounds: [0, 0, 400, 300]
+    data:
+      cols: [a, b]
+      rows:
+        - [1, 2]
+        - [1, 2, 3]
+    series:
+      - type: bar
+        encode: {x: a, y: b}
+"#;
+    let entry = tmp_deck("chart-rows", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("row 1 has 3 cells, expected 2")),
+        "expected a row-length finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn unknown_chart_series_type_is_reported() {
+    let page = r#"
+elements:
+  - elementId: c
+    elementType: chart
+    bounds: [0, 0, 400, 300]
+    data:
+      cols: [a, b]
+      rows:
+        - [1, 2]
+    series:
+      - type: radar
+        encode: {category: a, y: b}
+"#;
+    let entry = tmp_deck("unknown-series", MINIMAL_DECK, &[("p.page", page)]);
+    let result = pptd::load_project(Path::new(&entry));
+    let message = result
+        .expect_err("unknown series type must fail to parse")
+        .to_string();
+    assert!(
+        message.contains("unknown variant `radar`"),
+        "expected the serde unknown-variant finding, got: {message}"
+    );
+}
+
+#[test]
+fn table_ratio_sum_mismatch_is_reported() {
+    let page = r#"
+elements:
+  - elementId: t
+    elementType: table
+    bounds: [0, 0, 400, 300]
+    columnWidths: [0.5, 0.6]
+    rowHeights: [1.0]
+    rows:
+      - - text: a
+        - text: b
+"#;
+    let entry = tmp_deck("table-ratios", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("columnWidths must sum to 1")),
+        "expected a ratio-sum finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn animation_must_reference_existing_element() {
+    let page = r#"
+elements:
+  - elementId: t
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    content: {text: hi}
+animations:
+  - elementId: ghost
+    effect: fade-in
+"#;
+    let entry = tmp_deck("animation-target", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("references unknown elementId")),
+        "expected an animation-target finding, got {issues:?}"
+    );
+}
+
+#[test]
+fn undefined_theme_color_is_reported() {
+    let page = r#"
+elements:
+  - elementId: t
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    content:
+      text: hi
+      color: "$nonexistentColor"
+"#;
+    let entry = tmp_deck("undef-color", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues.iter().any(|d| d
+            .message
+            .contains("references undefined color `$nonexistentColor`")),
+        "expected undefined color diagnostic, got {issues:?}"
+    );
+}
+
+#[test]
+fn missing_image_file_is_reported() {
+    let page = r#"
+elements:
+  - elementId: img1
+    elementType: image
+    bounds: [0, 0, 100, 50]
+    src: "assets/nonexistent_image.png"
+"#;
+    let entry = tmp_deck("missing-img", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues.iter().any(|d| d
+            .message
+            .contains("references missing file `assets/nonexistent_image.png`")),
+        "expected missing image file diagnostic, got {issues:?}"
+    );
+}
+
+#[test]
+fn invalid_shape_name_is_reported() {
+    let page = r#"
+elements:
+  - elementId: s1
+    elementType: shape
+    bounds: [0, 0, 100, 50]
+    shapeName: "circle"
+"#;
+    let entry = tmp_deck("bad-shape", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues.iter().any(|d| d
+            .message
+            .contains("has unknown shapeName `circle` (did you mean `ellipse`?)")),
+        "expected invalid shape diagnostic with suggestion, got {issues:?}"
+    );
+}
+
+#[test]
+fn unsupported_rich_text_tags_are_reported() {
+    let page = r#"
+elements:
+  - elementId: t1
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    content:
+      text: "<p><ul><li>leaked list item</li></ul></p>"
+"#;
+    let entry = tmp_deck("unsupported-tag", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("contains unsupported tag `<ul>`")),
+        "expected unsupported tag diagnostic, got {issues:?}"
+    );
+}
+
+#[test]
+fn unknown_misspelled_fields_are_reported() {
+    let page = r##"
+elements:
+  - elementId: t1
+    elementType: text
+    bounds: [0, 0, 100, 50]
+    colro: "#ff0000"
+    content:
+      text: "hello"
+      font_sizee: 24
+"##;
+    let entry = tmp_deck("unknown-field", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("element `t1` has unknown field `colro`")),
+        "expected unknown field colro diagnostic, got {issues:?}"
+    );
+    assert!(
+        issues.iter().any(|d| d
+            .message
+            .contains("text `t1` content has unknown field `font_sizee`")),
+        "expected unknown field font_sizee diagnostic, got {issues:?}"
+    );
+}
+
+#[test]
+fn potential_text_overflow_is_reported() {
+    let page = r#"
+elements:
+  - elementId: t1
+    elementType: text
+    bounds: [0, 0, 100, 20]
+    content:
+      fontSize: 24
+      text: |
+        这是一段非常非常长的文字内容，在一个只有20pt高度的极小容器框里面排版，肯定会造成严重的上下文字视觉溢出，系统应当发出明确的文本溢出警告。
+"#;
+    let entry = tmp_deck("overflow", MINIMAL_DECK, &[("p.page", page)]);
+    let project = pptd::load_project(Path::new(&entry)).unwrap();
+    let issues = validate_project(&project);
+    assert!(
+        issues
+            .iter()
+            .any(|d| d.message.contains("potential text overflow in `t1`")),
+        "expected text overflow warning, got {issues:?}"
+    );
+}

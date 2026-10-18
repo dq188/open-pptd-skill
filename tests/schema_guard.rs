@@ -1,0 +1,512 @@
+//! Structural OOXML schema guards for the generated package.
+//!
+//! Every rule below corresponds to a regression that once produced a
+//! "repair needed" file (see the commit that fixed the WPS anomaly):
+//!
+//! * `a:xfrm` — `rot` / `flipH` / `flipV` are **attributes** of the
+//!   transform, never child elements;
+//! * `a:ln` — `prstDash` is a **child element** that must come *after* the
+//!   fill, never an attribute;
+//! * text boxes carry an explicit `a:noFill`;
+//! * `a:bgFillStyleLst` ships three background fills (PowerPoint habit);
+//! * `p:sld` children follow the strict order `cSld → clrMapOvr → transition`;
+//! * no legacy element names (`a:cTo`) survive.
+//!
+//! The scans parse every XML part with `xmltree`, so malformed XML also
+//! fails here.
+
+use std::fs;
+use std::io::Read;
+use std::path::{Path, PathBuf};
+
+use slideforge::pptd;
+use slideforge::pptx::writer::PptxWriter;
+use xmltree::{Element, XMLNode};
+
+/// Collapse `.`/`..` segments in a package-relative path.
+fn normalize_rel(path: &str) -> String {
+    let mut out: Vec<String> = Vec::new();
+    for segment in path.split('/') {
+        match segment {
+            "" | "." => {}
+            ".." => {
+                out.pop();
+            }
+            other => out.push(other.to_owned()),
+        }
+    }
+    out.join("/")
+}
+
+const BUILDABLE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/fixtures/buildable/buildable.pptd"
+);
+
+fn build_deck(tag: &str) -> PathBuf {
+    let project = pptd::load_project(Path::new(BUILDABLE)).unwrap();
+    let path = std::env::temp_dir().join(format!(
+        "slideforge-schema-{tag}-{}.pptx",
+        std::process::id()
+    ));
+    let _ = fs::remove_file(&path);
+    PptxWriter::new(&project).build(&path).unwrap();
+    path
+}
+
+/// Direct element children of `element` (skipping comments / CDATA).
+fn children(element: &Element) -> Vec<&Element> {
+    element
+        .children
+        .iter()
+        .filter_map(|node| match node {
+            XMLNode::Element(child) => Some(child),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Every XML part of the package: `(part name, parsed root element)`.
+fn xml_parts(path: &Path) -> Vec<(String, Element)> {
+    let file = fs::File::open(path).unwrap();
+    let mut zip = zip::ZipArchive::new(file).unwrap();
+    let mut parts = Vec::new();
+    for i in 0..zip.len() {
+        let mut entry = zip.by_index(i).unwrap();
+        if entry.name().ends_with(".xml") || entry.name().ends_with(".rels") {
+            let mut data = Vec::new();
+            entry.read_to_end(&mut data).unwrap();
+            let root = Element::parse(data.as_slice())
+                .unwrap_or_else(|err| panic!("{} is not well-formed XML: {err}", entry.name()));
+            parts.push((entry.name().to_owned(), root));
+        }
+    }
+    parts
+}
+
+/// Depth-first walk over every element.
+fn walk<'a>(element: &'a Element, out: &mut Vec<&'a Element>) {
+    out.push(element);
+    for child in children(element) {
+        walk(child, out);
+    }
+}
+
+#[test]
+fn xfrm_transform_flags_are_attributes() {
+    let path = build_deck("xfrm");
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "xfrm" {
+                continue;
+            }
+            for forbidden in ["rot", "flipH", "flipV"] {
+                assert!(
+                    children(element).iter().all(|c| c.name != forbidden),
+                    "{part}: <{forbidden}> must be an attribute of <a:xfrm>, not a child"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn line_dash_is_a_child_element_after_the_fill() {
+    let path = build_deck("ln");
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "ln" {
+                continue;
+            }
+            assert!(
+                !element.attributes.contains_key("prstDash"),
+                "{part}: a:prstDash must not be an attribute of <a:ln>"
+            );
+            let children = children(element);
+            if let Some(dash) = children.iter().position(|c| c.name == "prstDash") {
+                let fill = children.iter().position(|c| {
+                    matches!(
+                        c.name.as_str(),
+                        "solidFill" | "noFill" | "gradFill" | "blipFill" | "pattFill"
+                    )
+                });
+                if let Some(fill) = fill {
+                    assert!(
+                        dash > fill,
+                        "{part}: <a:prstDash> must come after the fill inside <a:ln>"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn text_boxes_explicitly_disable_fill() {
+    let path = build_deck("text");
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "sp" {
+                continue;
+            }
+            let sp_children = children(element);
+            let is_text_box = sp_children
+                .iter()
+                .find(|c| c.name == "nvSpPr")
+                .map(|nv| {
+                    let nv_children = children(nv);
+                    nv_children
+                        .iter()
+                        .find(|c| c.name == "cNvSpPr")
+                        .and_then(|c| c.attributes.get("txBox"))
+                        .is_some_and(|v| v == "1")
+                })
+                .unwrap_or(false);
+            if !is_text_box {
+                continue;
+            }
+            let sp_pr = sp_children
+                .iter()
+                .find(|c| c.name == "spPr")
+                .unwrap_or_else(|| panic!("{part}: text box p:sp without p:spPr"));
+            assert!(
+                children(sp_pr).iter().any(|c| c.name == "noFill"),
+                "{part}: text box must carry <a:noFill> (automatic fill would paint the box)"
+            );
+        }
+    }
+}
+
+#[test]
+fn background_style_list_has_three_entries() {
+    let path = build_deck("bgfill");
+    for (part, root) in xml_parts(&path) {
+        if part != "ppt/theme/theme1.xml" {
+            continue;
+        }
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name == "bgFillStyleLst" {
+                assert!(
+                    children(element).len() >= 3,
+                    "{part}: a:bgFillStyleLst should ship three background fills"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn slide_children_follow_the_schema_order() {
+    let path = build_deck("sld");
+    for (part, root) in xml_parts(&path) {
+        if root.name != "sld" {
+            continue;
+        }
+        let order = ["cSld", "clrMapOvr", "transition"];
+        let positions: Vec<usize> = order
+            .iter()
+            .map(|name| {
+                children(&root)
+                    .iter()
+                    .position(|c| c.name == *name)
+                    .unwrap_or_else(|| panic!("{part}: <p:sld> is missing <{name}>"))
+            })
+            .collect();
+        let mut sorted = positions.clone();
+        sorted.sort_unstable();
+        assert_eq!(
+            positions, sorted,
+            "{part}: <p:sld> children must be ordered cSld → clrMapOvr → transition"
+        );
+    }
+}
+
+#[test]
+fn no_legacy_element_names_survive() {
+    let path = build_deck("legacy");
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            assert_ne!(
+                element.name, "cTo",
+                "{part}: legacy <a:cTo> element (should be <a:cubicBezTo>)"
+            );
+        }
+    }
+}
+
+#[test]
+fn theme_colors_are_six_hex_digits_without_hash() {
+    // ST_HexColorRGB: exactly six hex digits. A `#` prefix makes the whole
+    // theme part invalid — the root cause of the second WPS repair dialog.
+    let path = build_deck("hex");
+    for (part, root) in xml_parts(&path) {
+        if part != "ppt/theme/theme1.xml" {
+            continue;
+        }
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "srgbClr" {
+                continue;
+            }
+            let val = element
+                .attributes
+                .get("val")
+                .unwrap_or_else(|| panic!("{part}: a:srgbClr without val"));
+            assert!(
+                val.len() == 6 && val.chars().all(|c| c.is_ascii_hexdigit()),
+                "{part}: srgbClr val `{val}` must be exactly six hex digits, no '#'"
+            );
+        }
+    }
+}
+
+#[test]
+fn complex_script_font_is_not_empty() {
+    let path = build_deck("csfont");
+    for (part, root) in xml_parts(&path) {
+        if part != "ppt/theme/theme1.xml" {
+            continue;
+        }
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "cs" {
+                continue;
+            }
+            let typeface = element
+                .attributes
+                .get("typeface")
+                .map(String::as_str)
+                .unwrap_or("");
+            assert!(
+                !typeface.is_empty(),
+                "{part}: <a:cs typeface=\"...\"> must not be empty"
+            );
+        }
+    }
+}
+
+#[test]
+fn clr_map_overrides_use_master_mapping() {
+    // Mirrors the Kimi exporter: overrideClrMapping on a layout/slide without
+    // its own clrMap is not the canonical form.
+    let path = build_deck("clrmap");
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for element in all {
+            if element.name != "clrMapOvr" {
+                continue;
+            }
+            let child = children(element);
+            assert_eq!(child.len(), 1, "{part}: clrMapOvr must have one child");
+            assert_eq!(
+                child[0].name, "masterClrMapping",
+                "{part}: clrMapOvr should carry a:masterClrMapping"
+            );
+        }
+    }
+}
+
+#[test]
+fn every_relationship_resolves_to_an_existing_part() {
+    // OPC relationship targets are resolved against the source part's
+    // directory. A target that points nowhere (e.g. "../../slideLayouts/..."
+    // from ppt/slides/) makes the app open the package as damaged.
+    let path = build_deck("rels");
+    let file = fs::File::open(&path).unwrap();
+    let mut zip = zip::ZipArchive::new(file).unwrap();
+    let names: Vec<String> = (0..zip.len())
+        .map(|i| zip.by_index(i).unwrap().name().to_owned())
+        .collect();
+
+    for i in 0..zip.len() {
+        let mut entry = zip.by_index(i).unwrap();
+        let part_name = entry.name().to_owned();
+        if !part_name.ends_with(".rels") {
+            continue;
+        }
+        let mut data = Vec::new();
+        entry.read_to_end(&mut data).unwrap();
+        let root = Element::parse(data.as_slice()).unwrap();
+
+        let base_dir = if part_name == "_rels/.rels" {
+            std::path::Path::new("")
+        } else {
+            std::path::Path::new(&part_name)
+                .parent()
+                .unwrap()
+                .parent()
+                .unwrap()
+        };
+        for rel in root.children.iter().filter_map(|node| match node {
+            XMLNode::Element(e) if e.name == "Relationship" => Some(e),
+            _ => None,
+        }) {
+            if rel.attributes.get("TargetMode").map(String::as_str) == Some("External") {
+                continue;
+            }
+            let target = rel
+                .attributes
+                .get("Target")
+                .map(String::as_str)
+                .unwrap_or("");
+            let resolved = if let Some(stripped) = target.strip_prefix('/') {
+                normalize_rel(stripped)
+            } else {
+                normalize_rel(&format!("{}/{}", base_dir.display(), target))
+            };
+            assert!(
+                names
+                    .iter()
+                    .any(|n| n == &resolved || n == &format!("./{resolved}")),
+                "{part_name}: relationship {} -> `{target}` resolves to `{resolved}`, \\
+                 which is not a part of the package",
+                rel.attributes.get("Id").map(String::as_str).unwrap_or("?")
+            );
+        }
+    }
+}
+
+#[test]
+fn text_boxes_have_zero_insets() {
+    // Kimi parity: a bodyPr without explicit insets falls back to the OOXML
+    // 0.1" (91440 EMU) default, which shifts text ~7px off the authored
+    // position in small boxes. Line spacing is NOT forced: a PPTD paragraph
+    // without `lineHeight` emits no `<a:lnSpc>` so the renderer uses its
+    // natural default (QuickLook/WPS ≈ 1.2× font), matching a source box
+    // that carried no `<a:lnSpc>` (forcing `spcPct=120000` rendered tight).
+    let path = build_deck("text-parity");
+    let root = xml_parts(&path)
+        .into_iter()
+        .find(|(name, _)| name.ends_with("slides/slide1.xml"))
+        .map(|(_, r)| r)
+        .expect("deck has slide1");
+    let mut sps = Vec::new();
+    walk(&root, &mut sps);
+    let sps: Vec<&Element> = sps.into_iter().filter(|e| e.name == "sp").collect();
+    assert!(sps.len() >= 3, "guard sees no shapes (saw {})", sps.len());
+    let mut found_body = 0;
+    for sp in &sps {
+        let Some(tx_body) = sp.children.iter().find_map(|n| match n {
+            XMLNode::Element(e) if e.name == "txBody" => Some(e),
+            _ => None,
+        }) else {
+            continue;
+        };
+        let Some(bp) = tx_body.children.iter().find_map(|n| match n {
+            XMLNode::Element(e) if e.name == "bodyPr" => Some(e),
+            _ => None,
+        }) else {
+            continue;
+        };
+        found_body += 1;
+        for key in ["lIns", "rIns", "tIns", "bIns", "rtlCol"] {
+            assert_eq!(
+                bp.attributes.get(key).map(String::as_str),
+                Some("0"),
+                "text box must zero the {key} inset (kimi parity)"
+            );
+        }
+        let p = tx_body
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if e.name == "p" => Some(e),
+                _ => None,
+            })
+            .expect("text box has a paragraph");
+        let ppr = p
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if e.name == "pPr" => Some(e),
+                _ => None,
+            })
+            .expect("paragraph carries explicit pPr (kimi parity)");
+        assert!(
+            ppr.attributes.contains_key("algn"),
+            "paragraph pPr carries explicit alignment (kimi parity)"
+        );
+        let end = p
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if e.name == "endParaRPr" => Some(e),
+                _ => None,
+            })
+            .expect("paragraph pins the end-mark size (kimi parity)");
+        let run_sz = p
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if e.name == "r" => Some(e),
+                _ => None,
+            })
+            .and_then(|r| {
+                r.children.iter().find_map(|n| match n {
+                    XMLNode::Element(e) if e.name == "rPr" => e.attributes.get("sz").cloned(),
+                    _ => None,
+                })
+            })
+            .unwrap_or_default();
+        assert_eq!(
+            end.attributes.get("sz"),
+            Some(&run_sz),
+            "endParaRPr sz must equal the run sz (kimi parity)"
+        );
+        // No `<a:lnSpc>` when the PPTD carries no `lineHeight` — let the
+        // renderer use its natural default (faithful to a source with none).
+        let has_ln_spc = ppr
+            .children
+            .iter()
+            .any(|n| matches!(n, XMLNode::Element(e) if e.name == "lnSpc"));
+        assert!(!has_ln_spc, "no lnSpc when PPTD has no lineHeight");
+    }
+    assert!(
+        found_body >= 2,
+        "guard must observe text boxes (saw {found_body})"
+    );
+}
+
+#[test]
+fn text_nodes_have_no_formatting_whitespace() {
+    // The writer indents for readability; a newline inside `<a:t>` is
+    // significant whitespace in DrawingML and renders as an empty first
+    // line, shifting every anchor=ctr text block down ~half a line.
+    let path = build_deck("at-whitespace");
+    let mut seen = 0;
+    for (part, root) in xml_parts(&path) {
+        let mut all = Vec::new();
+        walk(&root, &mut all);
+        for el in all {
+            if el.name != "t" {
+                continue;
+            }
+            seen += 1;
+            let text = el.get_text().unwrap_or_default();
+            assert!(!text.is_empty(), "{part}: <t> must not be empty");
+            assert_eq!(
+                text.trim(),
+                text.as_ref(),
+                "{part}: <t> has surrounding whitespace: {text:?}"
+            );
+            assert!(
+                !text.contains('\n'),
+                "{part}: <t> contains a line break: {text:?}"
+            );
+        }
+    }
+    assert!(seen >= 2, "guard observed {seen} <t> nodes");
+}

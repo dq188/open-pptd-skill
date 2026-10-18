@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2026 Binaryify Zhuang
+Copyright (c) 2026 shiquda and open-pptd contributors
+Copyright (c) 2026 Binaryify Zhuang (open-kimi-ppt-skill / PPTD specification)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+### Third-Party Licenses & Attributions (第三方协议与致谢说明)
+
+- **open-kimi-ppt-skill**:
+  本项目基于 Binaryify Zhuang 开发的 `open-kimi-ppt-skill`（MIT 许可证，https://github.com/acnlie/open-kimi-ppt-skill）演进重构，在此鸣谢原作者对 PPTD 声明式幻灯片语言理念及 Agent 技能的奠基性贡献。
+- **slideforge**:
+  集成并合并由 shiquda 开发的原生 Rust 编译引擎 `slideforge`（MIT 许可证，https://github.com/shiquda/slideforge），作为 Open PPTD 的核心离线编译器实现。
+- **Font Awesome Free 6 (Solid Icons)**:
+  本项目内嵌的矢量图标数据集来源于 Font Awesome 6.7.2（CC BY 4.0 许可证，https://fontawesome.com/license/free）。

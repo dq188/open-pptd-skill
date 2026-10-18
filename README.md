@@ -1,14 +1,13 @@
-# open-pptd-skill
+# Open PPTD (`open-pptd`)
 
 [简体中文](README.md) | [English](README_EN.md)
 
-[![GitHub Release](https://img.shields.io/github/v/release/shiquda/slideforge?label=slideforge)](https://github.com/shiquda/slideforge/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/shiquda/open-pptd-skill?label=release)](https://github.com/shiquda/open-pptd-skill/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-基于开放声明式演示文稿规范 **PPTD**（Declarative Presentation Language）与 Rust 原生高性能编译器 **slideforge** 的开源演示文稿全栈工具链。
+基于开放声明式幻灯片规范 **PPTD**（Declarative Presentation Language）与 Rust 原生高性能编译器的开源全栈演示文稿套件。集成了**本地原生编译器（`open-pptd` / `slideforge` CLI）**与**开箱即用的 AI Coding Agent 技能（Agent Skill）**于一体。
 
 专为 AI Coding Agent（Claude Code、Codex、Cursor、WorkBuddy、Multica 等）打造，**彻底剔除对原版 Kimi 网页端、无头浏览器、Cookie 登录凭证与网络拦截的脆弱依赖**，在本地实现 100% 离线、毫秒级响应、高度私密的原生 `.pptx` 编译与双向反编译。
-
 ---
 
 ## 核心特性
@@ -41,47 +40,53 @@ python3 skills/open-pptd/scripts/install_binary.py
 将 `open-pptd-skill` 注册到本地 Agent 的 Skills 目录下（如 `~/.agents/skills`、`~/.claude/skills` 等）：
 
 ```bash
-# 通过 npm / npx 快速分发安装
-npx open-pptd-skill install -y
-
-# 或直接从 GitHub 仓库运行
+# 通过 npm / npx 快速分发安装到本地 Agent 环境
 npx github:shiquda/open-pptd-skill install -y
 
 # 或在特定目录下安装
-npx open-pptd-skill install --target ~/.claude/skills
+npx github:shiquda/open-pptd-skill install --target ~/.claude/skills
 ```
-### 方式三：通过 Cargo 源码编译
+
+### 方式三：通过 Cargo 源码编译安装
+
+本项目根目录包含完整的 Rust 源码，可直接使用 Cargo 源码编译安装（将同时安装 `open-pptd` 和 `slideforge` 命令行工具）：
 
 ```bash
-cargo install --git https://github.com/shiquda/slideforge.git
+cargo install --git https://github.com/shiquda/open-pptd-skill.git
 ```
-
 ---
 
 ## 命令行与工作流
 
-### 1. 编译 PPTD 生成原生 PPTX (`build`)
+编译安装后，`open-pptd` 与 `slideforge` 命令完全等价，可直接使用：
+
+### 1. 静态语法与语义质检 (`check`)
 
 ```bash
-# 使用 slideforge CLI 直接构建
-slideforge build deck.pptd -o output.pptx
+open-pptd check deck.pptd
+```
+
+### 2. 编译 PPTD 生成原生 PPTX (`build`)
+
+```bash
+# 使用 open-pptd / slideforge CLI 直接构建
+open-pptd build deck.pptd -o output.pptx
 
 # 或使用 Python 脚本包装器（支持自动获取二进制）
 python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 ```
 
-### 2. 逆向反编译现有 PPTX 为 PPTD (`convert`)
+### 3. 逆向反编译现有 PPTX 为 PPTD (`convert`)
 
 将现有的 `.pptx` 解构为可继续编程编辑的声明式 PPTD 项目目录（含 `deck.pptd` 及每页 `.page` YAML 文件）：
 
 ```bash
-# 使用 slideforge convert（位置参数：输入文件 输出目录，无需 -o）
-slideforge convert existing_deck.pptx ./project_dir/
+# 使用 open-pptd convert（位置参数：输入文件 输出目录，无需 -o）
+open-pptd convert existing_deck.pptx ./project_dir/
 
 # 或通过 Python 脚本
 python3 skills/open-pptd/scripts/convert_pptx.py existing_deck.pptx -o ./project_dir/
 ```
-### 3. 多页切片与全景总览图导出 (`export_images`)
 
 ```bash
 python3 skills/open-pptd/scripts/export_images.py deck.pptd -o qa-images/
@@ -128,6 +133,14 @@ my_presentation/
 
 ---
 
-## 开源协议
+## 开源协议与致谢 (License & Attribution)
 
 本项目采用 [MIT 许可证](LICENSE)。
+
+### 鸣谢与上游开源协议说明：
+1. **`open-kimi-ppt-skill`**：
+   本项目源于并基于 Binaryify Zhuang 开发的 `open-kimi-ppt-skill`（MIT 许可证，[GitHub](https://github.com/acnlie/open-kimi-ppt-skill)）演进重构。在此致谢原作者对 PPTD 声明式幻灯片理念与 Agent Skill 的奠基性贡献。
+2. **`slideforge`**：
+   集成并合并由 shiquda 开发的原生 Rust 编译引擎 `slideforge`（MIT 许可证，[GitHub](https://github.com/shiquda/slideforge)）作为底层核心编译器，现作为单一代码库统一维护。
+3. **Font Awesome 6 (Solid Icons)**：
+   项目内嵌的矢量图标集合来源于 Font Awesome 6.7.2（CC BY 4.0 许可证，[License](https://fontawesome.com/license/free)）。

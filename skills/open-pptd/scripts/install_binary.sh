@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # slideforge standalone installer for open-pptd-skill
-REPO="shiquda/slideforge"
+REPOS=("shiquda/open-pptd" "shiquda/open-pptd-skill" "shiquda/slideforge")
+REPO="${REPOS[0]}"
 VERSION="1.0.4"
 INSTALL_DIR="${HOME}/.local/bin"
 FORCE=0
@@ -62,43 +63,42 @@ case "${OS}" in
     ;;
 esac
 
-URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ARCHIVE}"
-SUMS_URL="https://github.com/${REPO}/releases/download/v${VERSION}/SHA256SUMS.txt"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "${TMPDIR}"' EXIT
 
-echo "[open-pptd-skill] Attempting to download slideforge v${VERSION} (${ARCHIVE})..."
-
 DOWNLOAD_SUCCESS=0
-if curl -fSL --connect-timeout 15 --max-time 60 "${URL}" -o "${TMPDIR}/${ARCHIVE}" 2>/dev/null; then
-  DOWNLOAD_SUCCESS=1
-  echo "[open-pptd-skill] Download complete. Verifying checksum..."
-  
-  if curl -fSL --connect-timeout 10 --max-time 30 "${SUMS_URL}" -o "${TMPDIR}/SHA256SUMS.txt" 2>/dev/null; then
-    EXPECTED_SHA="$(grep "${ARCHIVE}" "${TMPDIR}/SHA256SUMS.txt" | awk '{print $1}' || true)"
-    if [ -n "${EXPECTED_SHA}" ]; then
-      if command -v sha256sum >/dev/null 2>&1; then
-        ACTUAL_SHA="$(sha256sum "${TMPDIR}/${ARCHIVE}" | awk '{print $1}')"
-      elif command -v shasum >/dev/null 2>&1; then
-        ACTUAL_SHA="$(shasum -a 256 "${TMPDIR}/${ARCHIVE}" | awk '{print $1}')"
-      else
-        ACTUAL_SHA=""
-      fi
+for repo_candidate in "${REPOS[@]}"; do
+  URL="https://github.com/${repo_candidate}/releases/download/v${VERSION}/${ARCHIVE}"
+  SUMS_URL="https://github.com/${repo_candidate}/releases/download/v${VERSION}/SHA256SUMS.txt"
+  echo "[open-pptd-skill] Attempting to download from ${repo_candidate}..."
+  if curl -fSL --connect-timeout 15 --max-time 60 "${URL}" -o "${TMPDIR}/${ARCHIVE}" 2>/dev/null; then
+    DOWNLOAD_SUCCESS=1
+    REPO="${repo_candidate}"
+    echo "[open-pptd-skill] Download complete from ${repo_candidate}. Verifying checksum..."
+    
+    if curl -fSL --connect-timeout 10 --max-time 30 "${SUMS_URL}" -o "${TMPDIR}/SHA256SUMS.txt" 2>/dev/null; then
+      EXPECTED_SHA="$(grep "${ARCHIVE}" "${TMPDIR}/SHA256SUMS.txt" | awk '{print $1}' || true)"
+      if [ -n "${EXPECTED_SHA}" ]; then
+        if command -v sha256sum >/dev/null 2>&1; then
+          ACTUAL_SHA="$(sha256sum "${TMPDIR}/${ARCHIVE}" | awk '{print $1}')"
+        elif command -v shasum >/dev/null 2>&1; then
+          ACTUAL_SHA="$(shasum -a 256 "${TMPDIR}/${ARCHIVE}" | awk '{print $1}')"
+        else
+          ACTUAL_SHA=""
+        fi
 
-      if [ -n "${ACTUAL_SHA}" ] && [ "${ACTUAL_SHA}" != "${EXPECTED_SHA}" ]; then
-        echo "[open-pptd-skill] Checksum verification failed!" >&2
-        echo "  Expected: ${EXPECTED_SHA}" >&2
-        echo "  Actual:   ${ACTUAL_SHA}" >&2
-        DOWNLOAD_SUCCESS=0
-      else
-        echo "[open-pptd-skill] Checksum verified: ${EXPECTED_SHA:0:12}..."
+        if [ -n "${ACTUAL_SHA}" ] && [ "${ACTUAL_SHA}" != "${EXPECTED_SHA}" ]; then
+          echo "[open-pptd-skill] Checksum verification failed for ${repo_candidate}!" >&2
+          DOWNLOAD_SUCCESS=0
+          continue
+        else
+          echo "[open-pptd-skill] Checksum verified: ${EXPECTED_SHA:0:12}..."
+        fi
       fi
     fi
+    break
   fi
-else
-  echo "[open-pptd-skill] Release download failed from ${URL}." >&2
-fi
-
+done
 if [ "$DOWNLOAD_SUCCESS" -eq 1 ]; then
   tar -xzf "${TMPDIR}/${ARCHIVE}" -C "${TMPDIR}"
   if [ -f "${TMPDIR}/slideforge" ]; then
