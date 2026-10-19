@@ -8,9 +8,50 @@
 [![Node >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![Rust >= 1.85](https://img.shields.io/badge/rust-%3E%3D1.85-orange)](https://www.rust-lang.org)
 
-**Open PPTD** 是面向 AI Coding Agent（Claude Code、Cursor、Codex、WorkBuddy、Multica 等）与开发者的开源声明式幻灯片套件。基于开放的 **PPTD**（Declarative Presentation Language）YAML 规范，提供 **100% 本地离线、毫秒级响应** 的原生 Rust 编译器（`pptd` CLI）与开箱即用的 Agent 技能。
+**Open PPTD** 是面向 AI Coding Agent（Claude Code、Cursor、Codex、WorkBuddy、Windsurf、Multica 等）与开发者的开源声明式幻灯片套件。基于开放的 **PPTD**（Declarative Presentation Language）YAML 规范，提供 **100% 本地离线、毫秒级响应** 的原生 Rust 编译器（`pptd` CLI）与开箱即用的 Agent 技能。
 
 彻底剔除对网页端会话、无头浏览器、Cookie 凭证与云端接口的脆弱依赖，在本地毫秒级生成真实可编辑、带矢量图形与数学公式的原生 `.pptx` 成品及双向工程。
+
+---
+
+## ⚡ 快速安装与就绪（首选且唯一推荐）
+
+> [!TIP]
+> **无需人工折腾环境与配置！** 我们**首选且仅推荐**直接让您的 AI Coding Agent 安装本 Skill，并由 Agent 根据指引全自动完成本地 `pptd` 原生编译器的就绪与环境验证。
+
+### 📋 复制下方指令发给您的 Agent 即可：
+
+```text
+请帮我安装并配置 open-pptd 幻灯片制作技能：
+1. 运行命令安装 Skill：
+   npx skills add https://github.com/shiquda/open-pptd-skill -g -y
+2. 参考该技能目录内的指引（SKILL.md），运行安装脚本确保本地原生 `pptd` 编译器就绪：
+   python3 skills/open-pptd/scripts/install_binary.py
+3. 终端执行 `pptd --version` 验证安装成功；
+4. 配置完成后向我汇报，后续我将直接让你制作可编辑的 PPTX 幻灯片。
+```
+
+> **安装命令说明**：
+> - **标准生态命令（推荐）**：使用通用技能包管理器 `npx skills add https://github.com/shiquda/open-pptd-skill -g -y`（或 `npx skills add shiquda/open-pptd-skill -g -y`）。
+> - **npm/npx 兼容命令**：亦可通过 `npx github:shiquda/open-pptd install -y` 直接分发。
+
+---
+
+## 💬 让 Agent 制作 PPT（日常使用）
+
+配置就绪后，直接向 Agent 描述你的主题与诉求。**Agent 默认将同时交付两份产物**：可二次代码编辑的 PPTD 源码工程目录，以及离线极速编译出的原生 `.pptx` 成品文件。
+
+### 📋 复制发送给 Agent 制作文稿：
+
+```text
+使用 open-pptd 为我制作一份关于「分布式架构演进」的 8 页商业技术演讲 PPT：
+- 风格主题参考：深色科技风（dark-themed-data）
+- 核心内容要求：
+  1. 包含封面、架构演进痛点、微服务架构蓝图（必须包含带箭头的连接线与矢量容器框）、核心技术指标对比表格；
+  2. 每页均需包含完整的演讲者备注（notes: "..."），供演练参考；
+  3. 严格使用 LaTeX 原生数学公式呈现核心算法；
+- 交付标准：生成完整的 PPTD 工程及编译好的 PPTX 文件，并在完成后运行 validate_pptx.py 质检通过。
+```
 
 ---
 
@@ -40,71 +81,6 @@ Open PPTD 坚持 **「PPTD 源码工程 + 原生可编辑 PPTX」** 双交付路
 | **构建性能与依赖** | **<0.05 秒**（Rust 原生离线执行） | 1 ~ 5 秒（Node 运行时） | 10 ~ 30 秒（出图排队） | 需浏览器环境播放 |
 | **数学公式与排版** | **原生 LaTeX 数学排版**（变量斜体/字号缩放） | 不支持或需外部插件 | 依赖图片生成 | MathJax / KaTeX 渲染 |
 | **安全与隐私** | **零网络调用**，内网离线沙箱安全 | 本地执行 | 需将文本上传云端大模型出图 | 通常依赖 Web 渲染 |
-
----
-
-## ⚡ 极速开始 (Quick Start)
-
-### 1. 一键安装编译器 CLI (`pptd`)
-
-支持 macOS（Apple Silicon / Intel）、Linux（x86_64 / arm64）以及 Windows（x86_64）：
-
-```bash
-# 方式 A：通过 curl 脚本一键下载预编译包到 ~/.local/bin/pptd（推荐）
-curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
-
-# 方式 B：通过 Python 跨平台安装脚本
-python3 skills/open-pptd/scripts/install_binary.py
-
-# 方式 C：通过 Rust / Cargo 从源码极速编译安装
-cargo install --git https://github.com/shiquda/open-pptd.git
-```
-
-验证安装：
-```bash
-pptd --version
-# 输出: pptd 1.0.4
-```
-
-### 2. 注册 Agent Skill（可选）
-
-将技能无缝挂载至当前 Coding Agent 环境（如 Codex、Claude Code、Cursor 等）：
-
-```bash
-# 通过 npx 自动分发至全局技能目录 ~/.agents/skills/open-pptd
-npx github:shiquda/open-pptd install -y
-
-# 或显式指定目标 Agent 路径
-npx github:shiquda/open-pptd install --target ~/.claude/skills
-```
-
----
-
-## 🚀 核心工作流与 CLI 命令
-
-### 1. 语义与结构静态质检 (`pptd check`)
-在编译前全面扫描语法、非法字段、未定义色彩 `$token`、缺失资源与文字溢出风险：
-```bash
-pptd check my_project/deck.pptd
-```
-
-### 2. 毫秒级编译为原生 PPTX (`pptd build`)
-将声明式工程直接编译为真矢量、带演讲者备注的 OpenXML `.pptx` 文件：
-```bash
-pptd build my_project/deck.pptd -o presentation.pptx
-```
-
-### 3. 反向反编译已有 PPTX 为 PPTD 工程 (`pptd convert`)
-解构现有演示文稿，提取页面、文本、颜色与表格，生成可继续用代码维护的 PPTD 项目：
-```bash
-pptd convert presentation.pptx ./decompiled_project/
-```
-
-### 4. 自动化深度质检套件 (`validate_pptx.py`)
-全面核验成品的页数完整性、未解析 HTML 泄漏标签检索、溢出预警与备注覆盖度：
-```bash
-python3 skills/open-pptd/scripts/validate_pptx.py presentation.pptx --expected-pages 8 --check-notes
-```
 
 ---
 
@@ -141,6 +117,47 @@ my_presentation/
 - [30+ 款精选主题配色表 (theme.md)](theme.md)
 - [CLI 命令参考手册 (cli.md)](skills/open-pptd/reference/cli.md)
 - [跨平台安全排版与字体指南 (fonts.md)](skills/open-pptd/reference/fonts.md)
+
+---
+
+## 🛠️ 附录：开发者手动安装与 CLI 命令（高级调试）
+
+<details>
+<summary>点击展开：脱离 Agent 手动运行 <code>pptd</code> CLI 指南</summary>
+
+如果您需要脱离 Agent 在本地终端中直接调用 `pptd` CLI 进行开发或调试，可以通过以下方式安装与运行：
+
+### 1. 手动安装 CLI
+```bash
+# 方式 A：通过 curl 脚本一键下载预编译包到 ~/.local/bin/pptd
+curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
+
+# 方式 B：通过 Python 跨平台安装脚本
+python3 skills/open-pptd/scripts/install_binary.py
+
+# 方式 C：通过 Rust / Cargo 从源码编译安装
+cargo install --git https://github.com/shiquda/open-pptd.git
+```
+
+### 2. 核心 CLI 命令
+- **语义与结构静态质检**：
+  ```bash
+  pptd check my_project/deck.pptd
+  ```
+- **毫秒级编译为原生 PPTX**：
+  ```bash
+  pptd build my_project/deck.pptd -o presentation.pptx
+  ```
+- **反向反编译已有 PPTX 为 PPTD 工程**：
+  ```bash
+  pptd convert presentation.pptx ./decompiled_project/
+  ```
+- **自动化深度质检套件**：
+  ```bash
+  python3 skills/open-pptd/scripts/validate_pptx.py presentation.pptx --expected-pages 8 --check-notes
+  ```
+
+</details>
 
 ---
 

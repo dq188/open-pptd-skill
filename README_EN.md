@@ -8,9 +8,50 @@
 [![Node >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![Rust >= 1.85](https://img.shields.io/badge/rust-%3E%3D1.85-orange)](https://www.rust-lang.org)
 
-**Open PPTD** is an open-source declarative presentation toolkit and AI Agent skill tailored for AI coding agents (Claude Code, Cursor, Codex, WorkBuddy, Multica) and developers. Built on the open **PPTD** (Declarative Presentation Language) YAML specification, it provides a **100% offline, sub-second native Rust compiler (`pptd` CLI)** and an out-of-the-box agent skill.
+**Open PPTD** is an open-source declarative presentation toolkit and AI Agent skill tailored for AI coding agents (Claude Code, Cursor, Codex, WorkBuddy, Windsurf, Multica) and developers. Built on the open **PPTD** (Declarative Presentation Language) YAML specification, it provides a **100% offline, sub-second native Rust compiler (`pptd` CLI)** and an out-of-the-box agent skill.
 
 It completely eliminates brittle dependencies on web sessions, headless browsers, cookies, or cloud API tokens, delivering fully editable, vector-sharp native PowerPoint (`.pptx`) decks and round-trippable project directories directly on your local machine.
+
+---
+
+## ⚡ Quick Setup: Agent-First Installation (Recommended)
+
+> [!TIP]
+> **Zero Manual Environment Hassle!** We **strongly and exclusively recommend** letting your AI Coding Agent install this skill and follow its instructions to configure the native `pptd` compiler automatically.
+
+### 📋 Copy and send this instruction to your AI Agent:
+
+```text
+Please install and set up the open-pptd presentation skill for me:
+1. Run the skill installation command:
+   npx skills add https://github.com/shiquda/open-pptd-skill -g -y
+2. Follow the instructions in the skill directory (SKILL.md) and run the installer script to ensure the native `pptd` compiler is ready:
+   python3 skills/open-pptd/scripts/install_binary.py
+3. Run `pptd --version` in terminal to verify installation;
+4. Notify me when setup is complete, so I can start asking you to create editable PPTX presentations.
+```
+
+> **Installation Command Notes**:
+> - **Standard Ecosystem Command (Recommended)**: Use standard skill managers via `npx skills add https://github.com/shiquda/open-pptd-skill -g -y` (or `npx skills add shiquda/open-pptd-skill -g -y`).
+> - **Direct npm/npx Compatibility**: You can also use `npx github:shiquda/open-pptd install -y`.
+
+---
+
+## 💬 Generating Presentations with AI (Daily Usage)
+
+Once configured, simply describe your presentation goals to your agent. **The agent always delivers both**: a fully editable PPTD source project folder and the compiled, production-ready `.pptx` file.
+
+### 📋 Copy and send to your Agent:
+
+```text
+Use open-pptd to create an 8-slide keynote presentation on "Distributed Systems Architecture Evolution":
+- Theme style: Dark Tech (dark-themed-data)
+- Content requirements:
+  1. Cover, architectural pain points, blueprint diagram (with arrowed connectors and vector cards), and performance metric comparison table;
+  2. Every slide must include speaker rehearsal notes (notes: "...");
+  3. Format algorithmic formulations using native LaTeX math;
+- Deliverables: Complete PPTD project directory and compiled PPTX deck, verified with validate_pptx.py.
+```
 
 ---
 
@@ -40,71 +81,6 @@ Common AI presentation generators suffer from major tradeoffs: programmatic OOXM
 | **Build Speed & Deps** | **<0.05s** (Native Rust, 100% offline) | 1 ~ 5s (Node.js runtime) | 10 ~ 30s (Model queue) | Requires browser runtime |
 | **Math Typography** | **Academic LaTeX math rendering** (slanted vars, scripts) | Unsupported or requires plugins | Relies on raster text | MathJax / KaTeX rendering |
 | **Security & Privacy** | **Zero network calls**, sandbox-safe | Local runtime | Sends slide content to cloud LLM | Usually requires web renderer |
-
----
-
-## ⚡ Quick Start
-
-### 1. Install the Native Compiler CLI (`pptd`)
-
-Supported platforms: macOS (Apple Silicon / Intel), Linux (x86_64 / arm64), and Windows (x86_64).
-
-```bash
-# Method A: Automatic download script to ~/.local/bin/pptd (Recommended)
-curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
-
-# Method B: Cross-platform Python installer
-python3 skills/open-pptd/scripts/install_binary.py
-
-# Method C: Install from source using Cargo
-cargo install --git https://github.com/shiquda/open-pptd.git
-```
-
-Verify your installation:
-```bash
-pptd --version
-# Output: pptd 1.0.4
-```
-
-### 2. Register the Agent Skill (Optional)
-
-Install the skill into your AI coding assistant environment (Codex, Claude Code, Cursor, etc.):
-
-```bash
-# Install to default global skills directory ~/.agents/skills/open-pptd
-npx github:shiquda/open-pptd install -y
-
-# Or specify a custom target path
-npx github:shiquda/open-pptd install --target ~/.claude/skills
-```
-
----
-
-## 🚀 Core Workflows & CLI Commands
-
-### 1. Static Project Diagnostics (`pptd check`)
-Perform strict pre-compilation audits for syntax errors, undeclared fields, missing `$theme` color tokens, broken asset paths, and text overflow risks:
-```bash
-pptd check my_project/deck.pptd
-```
-
-### 2. High-Speed Native Compilation (`pptd build`)
-Compile the declarative project into an OpenXML `.pptx` presentation with full vector shapes and speaker notes:
-```bash
-pptd build my_project/deck.pptd -o presentation.pptx
-```
-
-### 3. Decompile Existing PPTX to PPTD (`pptd convert`)
-Reverse-engineer an existing PowerPoint deck into an editable PPTD project directory (pages, master layouts, tables, and colors):
-```bash
-pptd convert presentation.pptx ./decompiled_project/
-```
-
-### 4. Automated QA Verification (`validate_pptx.py`)
-Inspect the generated PPTX package for page counts, leaked unparsed HTML tags, boundary errors, and speaker note coverage:
-```bash
-python3 skills/open-pptd/scripts/validate_pptx.py presentation.pptx --expected-pages 8 --check-notes
-```
 
 ---
 
@@ -141,6 +117,35 @@ For detailed specifications and guides, see:
 - [Pre-designed Theme Palettes (theme.md)](theme.md)
 - [CLI Reference Manual (cli.md)](skills/open-pptd/reference/cli.md)
 - [Typography & Font Guidelines (fonts.md)](skills/open-pptd/reference/fonts.md)
+
+---
+
+## 🛠️ Appendix: Manual CLI Installation & Reference (Advanced Debugging)
+
+<details>
+<summary>Click to expand: Standalone CLI installation without an agent</summary>
+
+If you need to invoke the `pptd` compiler directly in your terminal for debugging:
+
+### 1. Manual CLI Installation
+```bash
+# Method A: Automatic download script to ~/.local/bin/pptd
+curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
+
+# Method B: Cross-platform Python installer
+python3 skills/open-pptd/scripts/install_binary.py
+
+# Method C: Install from source using Cargo
+cargo install --git https://github.com/shiquda/open-pptd.git
+```
+
+### 2. Core CLI Commands
+- **Static Diagnostics**: `pptd check my_project/deck.pptd`
+- **Native PPTX Build**: `pptd build my_project/deck.pptd -o presentation.pptx`
+- **Decompile PPTX**: `pptd convert presentation.pptx ./decompiled_project/`
+- **Automated QA**: `python3 skills/open-pptd/scripts/validate_pptx.py presentation.pptx --expected-pages 8 --check-notes`
+
+</details>
 
 ---
 
