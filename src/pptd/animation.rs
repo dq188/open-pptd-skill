@@ -85,7 +85,10 @@ pub enum AnimationDirection {
 #[serde(rename_all = "snake_case")]
 pub enum AnimationEasing {
     Linear,
+    #[serde(alias = "ease-in")]
     EaseIn,
+    #[serde(alias = "ease-out")]
     EaseOut,
+    #[serde(alias = "ease-in-out")]
     EaseInOut,
 }

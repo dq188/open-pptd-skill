@@ -82,7 +82,13 @@ fn recorded_hash(work: &Path, path: &Path) -> Option<String> {
     let key = path.canonicalize().unwrap();
     let mut lines = text.lines();
     while let (Some(hash), Some(line_path)) = (lines.next(), lines.next()) {
-        if Path::new(line_path) == key {
+        let p = Path::new(line_path);
+        let resolved = if p.is_relative() {
+            work.join(p).canonicalize().unwrap_or_else(|_| work.join(p))
+        } else {
+            p.canonicalize().unwrap_or_else(|_| p.to_path_buf())
+        };
+        if resolved == key {
             return Some(hash.to_string());
         }
     }

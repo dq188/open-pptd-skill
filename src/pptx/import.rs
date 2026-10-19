@@ -266,7 +266,8 @@ pub fn convert_pptx_to_pptd(input: &Path, out_dir: &Path) -> Result<ConvertRepor
     for (idx, part) in slide_parts.iter().enumerate() {
         let page_no = idx + 1;
         let slide = parse_part(&mut zip, part)?;
-        let (rels, layout_part) = parse_slide_rels(&mut zip, part);
+        let (rels, layout_part, notes_part) = parse_slide_rels(&mut zip, part);
+        let notes = notes_part.as_deref().and_then(|np| extract_notes(&mut zip, np));
 
         // Build (or reuse) the layout for this slide's source layout part:
         // decorative shapes + placeholders + per-layout defaults, captured
@@ -333,7 +334,7 @@ pub fn convert_pptx_to_pptd(input: &Path, out_dir: &Path) -> Result<ConvertRepor
             group_seq: 0,
             in_master: false,
         };
-        let page = extract_slide(&slide, part, &mut zip, &mut ctx, &rels)?;
+        let page = extract_slide(&slide, part, &mut zip, &mut ctx, &rels, notes)?;
         element_count += page.elements.len();
 
         let file_name = format!("{page_no}.page");
@@ -1039,13 +1040,14 @@ fn placeholder_def(proto: &PlaceholderProto, fonts: &ThemeFonts) -> PlaceholderD
     }
 }
 
-/// Parse a slide's `.rels` → (relationship map, layout part path).
+/// Parse a slide's `.rels` → (relationship map, layout part path, notes part path).
 fn parse_slide_rels(
     zip: &mut zip::ZipArchive<fs::File>,
     part: &str,
-) -> (BTreeMap<String, String>, Option<String>) {
+) -> (BTreeMap<String, String>, Option<String>, Option<String>) {
     let mut rels = BTreeMap::new();
     let mut layout_part = None;
+    let mut notes_part = None;
     if let Ok(rels_root) = parse_part(zip, &rels_part(part)) {
         for rel in children(&rels_root, "Relationship") {
             let id = attr(rel, "Id").unwrap_or_default().to_string();
@@ -1055,11 +1057,48 @@ fn parse_slide_rels(
                 && layout_part.is_none()
             {
                 layout_part = Some(resolved.clone());
+            } else if attr(rel, "Type").is_some_and(|t| t.ends_with("/notesSlide"))
+                && notes_part.is_none()
+            {
+                notes_part = Some(resolved.clone());
             }
             rels.insert(id, resolved);
         }
     }
-    (rels, layout_part)
+    (rels, layout_part, notes_part)
+}
+
+fn extract_notes(zip: &mut zip::ZipArchive<fs::File>, notes_part: &str) -> Option<String> {
+    let root = parse_part(zip, notes_part).ok()?;
+    let c_sld = first(&root, "cSld")?;
+    let sp_tree = first(c_sld, "spTree")?;
+    for sp in children(sp_tree, "sp") {
+        let nv_sp_pr = first(sp, "nvSpPr")?;
+        let nv_pr = first(nv_sp_pr, "nvPr")?;
+        let ph = first(nv_pr, "ph");
+        let is_body = ph
+            .and_then(|p| attr(p, "type"))
+            .map(|t| t == "body")
+            .unwrap_or(false);
+        if is_body {
+            let tx_body = first(sp, "txBody")?;
+            let mut lines = Vec::new();
+            for p in children(tx_body, "p") {
+                let mut line = String::new();
+                for r in children(p, "r") {
+                    if let Some(t) = first(r, "t").and_then(|el| el.get_text()) {
+                        line.push_str(&t);
+                    }
+                }
+                lines.push(line);
+            }
+            let text = lines.join("\n").trim().to_string();
+            if !text.is_empty() {
+                return Some(text);
+            }
+        }
+    }
+    None
 }
 
 /// Build a [`LayoutDef`] (background + decorative elements + placeholders)
@@ -1373,6 +1412,7 @@ fn extract_slide(
     _zip: &mut zip::ZipArchive<fs::File>,
     ctx: &mut PageCtx<'_>,
     rels: &BTreeMap<String, String>,
+    notes: Option<String>,
 ) -> Result<Page> {
     let c_sld = first(slide, "cSld")
         .ok_or_else(|| Error::Invalid(format!("slide part {part} has no p:cSld")))?;
@@ -1401,7 +1441,7 @@ fn extract_slide(
         page_type: None,
         layout: ctx.layout_key.clone(),
         background,
-        notes: None,
+        notes,
         elements,
         animations: None,
         groups: if ctx.groups.is_empty() {

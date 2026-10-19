@@ -153,7 +153,7 @@ elements:
       fontSize: 11
       color: "$w50"
       text: |
-        来源：<a href="https://www.xiaomiev.com/yu7">小米汽车官网</a> · 数据来自小米汽车实验室，配置区分车型版本
+        来源：小米汽车官网 · 数据来自小米汽车实验室，配置区分车型版本
   - elementId: page-num
     elementType: text
     bounds: [850, 500, 60, 20]

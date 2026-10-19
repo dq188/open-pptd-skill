@@ -25,15 +25,15 @@
 请帮我安装并配置 open-pptd 幻灯片制作技能：
 1. 运行命令安装 Skill：
    npx skills add https://github.com/shiquda/open-pptd-skill -g -y
-2. 参考该技能目录内的指引（SKILL.md），运行安装脚本确保本地原生 `pptd` 编译器就绪：
-   python3 skills/open-pptd/scripts/install_binary.py
-3. 终端执行 `pptd --version` 验证安装成功；
-4. 配置完成后向我汇报，后续我将直接让你制作可编辑的 PPTX 幻灯片。
+2. 运行技能内置的安装脚本以就绪本地原生 `pptd` 编译器（可直接使用绝对路径或先 cd 到技能目录）：
+   python3 ~/.agents/skills/open-pptd/scripts/install_binary.py
+3. 验证编译器：终端执行 `pptd --version`；若提示 command not found，请执行 `export PATH="$HOME/.local/bin:$PATH"`；
+4. 配置完成后向我汇报已就绪。
 ```
 
 > **安装命令说明**：
 > - **标准生态命令（推荐）**：使用通用技能包管理器 `npx skills add https://github.com/shiquda/open-pptd-skill -g -y`（或 `npx skills add shiquda/open-pptd-skill -g -y`）。
-> - **npm/npx 兼容命令**：亦可通过 `npx github:shiquda/open-pptd install -y` 直接分发。
+> - **npm/npx 兼容命令**：亦可通过 `npx github:shiquda/open-pptd-skill install -y` 直接分发。
 
 ---
 
@@ -45,7 +45,7 @@
 
 ```text
 使用 open-pptd 为我制作一份关于「分布式架构演进」的 8 页商业技术演讲 PPT：
-- 风格主题参考：深色科技风（dark-themed-data）
+- 风格主题参考：深色金融科技风（ebony-ledger）或深蓝学术风（deep-blue-atlas）
 - 核心内容要求：
   1. 包含封面、架构演进痛点、微服务架构蓝图（必须包含带箭头的连接线与矢量容器框）、核心技术指标对比表格；
   2. 每页均需包含完整的演讲者备注（notes: "..."），供演练参考；
@@ -130,13 +130,13 @@ my_presentation/
 ### 1. 手动安装 CLI
 ```bash
 # 方式 A：通过 curl 脚本一键下载预编译包到 ~/.local/bin/pptd
-curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd-skill/main/skills/open-pptd/scripts/install_binary.sh | bash
 
 # 方式 B：通过 Python 跨平台安装脚本
 python3 skills/open-pptd/scripts/install_binary.py
 
 # 方式 C：通过 Rust / Cargo 从源码编译安装
-cargo install --git https://github.com/shiquda/open-pptd.git
+cargo install --git https://github.com/shiquda/open-pptd-skill.git
 ```
 
 ### 2. 核心 CLI 命令

@@ -300,11 +300,10 @@ impl<'a> PptxWriter<'a> {
                 ));
                 entries.push(PackageEntry::opaque(
                     format!("ppt/notesSlides/_rels/notesSlide{index}.xml.rels"),
-                    rels_xml(&[Rel::new(
-                        "rId1",
-                        rel_kind::SLIDE,
-                        format!("../slides/slide{index}.xml"),
-                    )]),
+                    rels_xml(&[
+                        Rel::new("rId1", rel_kind::SLIDE, format!("../slides/slide{index}.xml")),
+                        Rel::new("rId2", rel_kind::NOTES_MASTER, "../notesMasters/notesMaster1.xml"),
+                    ]),
                 ));
                 let next_rid = rels.len() + 1;
                 rels.push(Rel::new(
@@ -325,13 +324,27 @@ impl<'a> PptxWriter<'a> {
         for part in media.into_parts() {
             entries.push(PackageEntry::opaque(part.package_path, part.data));
         }
+        let notes_count = pages
+            .iter()
+            .filter(|p| p.notes.as_deref().is_some_and(|n| !n.trim().is_empty()))
+            .count();
+        let has_notes = notes_count > 0;
 
-        // presentation
-        entries.push(PackageEntry::typed(
-            "ppt/presentation.xml",
-            ContentType::Presentation,
-            presentation_xml(presentation),
-        ));
+        if has_notes {
+            entries.push(PackageEntry::typed(
+                "ppt/notesMasters/notesMaster1.xml",
+                ContentType::NotesMaster,
+                notes_master_xml(),
+            ));
+            entries.push(PackageEntry::opaque(
+                "ppt/notesMasters/_rels/notesMaster1.xml.rels",
+                rels_xml(&[Rel::new("rId1", rel_kind::THEME, "../theme/theme1.xml")]),
+            ));
+        }
+
+        // docProps/app.xml
+        entries.push(app_properties_xml(page_count, notes_count));
+
         let mut presentation_rels = vec![
             Rel::new(
                 "rId1",
@@ -347,6 +360,25 @@ impl<'a> PptxWriter<'a> {
                 format!("slides/slide{i}.xml"),
             ));
         }
+
+        let notes_master_rid = if has_notes {
+            let rid = format!("rId{}", page_count + 3);
+            presentation_rels.push(Rel::new(
+                &rid,
+                rel_kind::NOTES_MASTER,
+                "notesMasters/notesMaster1.xml",
+            ));
+            Some(rid)
+        } else {
+            None
+        };
+
+        // presentation
+        entries.push(PackageEntry::typed(
+            "ppt/presentation.xml",
+            ContentType::Presentation,
+            presentation_xml(presentation, notes_master_rid.as_deref()),
+        ));
         entries.push(PackageEntry::opaque(
             "ppt/_rels/presentation.xml.rels",
             rels_xml(&presentation_rels),
@@ -358,9 +390,9 @@ impl<'a> PptxWriter<'a> {
             rels_xml(&[
                 Rel::new("rId1", rel_kind::OFFICE_DOCUMENT, "ppt/presentation.xml"),
                 Rel::new("rId2", rel_kind::CORE_PROPERTIES, "docProps/core.xml"),
+                Rel::new("rId3", rel_kind::EXTENDED_PROPERTIES, "docProps/app.xml"),
             ]),
         ));
-
         Ok((entries, media_extensions))
     }
 
@@ -462,7 +494,7 @@ fn core_properties_xml(presentation: &Presentation) -> PackageEntry {
     )
 }
 
-fn presentation_xml(presentation: &Presentation) -> Vec<u8> {
+fn presentation_xml(presentation: &Presentation, notes_master_rid: Option<&str>) -> Vec<u8> {
     let cx = render::emu(presentation.size.width).to_string();
     let cy = render::emu(presentation.size.height).to_string();
     let mut x = Xml::new();
@@ -477,6 +509,11 @@ fn presentation_xml(presentation: &Presentation) -> Vec<u8> {
     x.start("p:sldMasterIdLst", &[]);
     x.leaf("p:sldMasterId", &[("id", "2147483648"), ("r:id", "rId1")]);
     x.end("p:sldMasterIdLst");
+    if let Some(nm_rid) = notes_master_rid {
+        x.start("p:notesMasterIdLst", &[]);
+        x.leaf("p:notesMasterId", &[("r:id", nm_rid)]);
+        x.end("p:notesMasterIdLst");
+    }
     x.start("p:sldIdLst", &[]);
     for (i, _) in presentation.pages.iter().enumerate() {
         let slide_id = (256 + i).to_string();
@@ -487,6 +524,136 @@ fn presentation_xml(presentation: &Presentation) -> Vec<u8> {
     x.leaf("p:sldSz", &[("cx", &cx), ("cy", &cy)]);
     x.leaf("p:notesSz", &[("cx", "6858000"), ("cy", "9144000")]);
     x.end("p:presentation");
+    x.into_string().into_bytes()
+}
+
+fn app_properties_xml(page_count: usize, notes_count: usize) -> PackageEntry {
+    let mut x = Xml::new();
+    x.start(
+        "Properties",
+        &[
+            ("xmlns", ns::EXTENDED_PROPS),
+            ("xmlns:vt", "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"),
+        ],
+    );
+    x.text_elem("Application", "Open PPTD");
+    x.text_elem("PresentationFormat", "Widescreen");
+    x.text_elem("Slides", &page_count.to_string());
+    x.text_elem("Notes", &notes_count.to_string());
+    x.text_elem("TotalTime", "0");
+    x.text_elem("Words", "0");
+    x.text_elem("Paragraphs", "0");
+    x.end("Properties");
+    PackageEntry::typed(
+        "docProps/app.xml",
+        ContentType::AppProperties,
+        x.into_string().into_bytes(),
+    )
+}
+
+fn notes_master_xml() -> Vec<u8> {
+    let mut x = Xml::new();
+    x.start(
+        "p:notesMaster",
+        &[
+            ("xmlns:a", ns::DRAWINGML),
+            ("xmlns:r", ns::RELATIONSHIPS),
+            ("xmlns:p", ns::PRESENTATIONML),
+        ],
+    );
+    x.start("p:cSld", &[]);
+    x.start("p:spTree", &[]);
+    x.start("p:nvGrpSpPr", &[]);
+    x.leaf("p:cNvPr", &[("id", "1"), ("name", "")]);
+    x.leaf("p:cNvGrpSpPr", &[]);
+    x.leaf("p:nvPr", &[]);
+    x.end("p:nvGrpSpPr");
+    x.start("p:grpSpPr", &[]);
+    x.start("a:xfrm", &[]);
+    x.leaf("a:off", &[("x", "0"), ("y", "0")]);
+    x.leaf("a:ext", &[("cx", "0"), ("cy", "0")]);
+    x.leaf("a:chOff", &[("x", "0"), ("y", "0")]);
+    x.leaf("a:chExt", &[("cx", "0"), ("cy", "0")]);
+    x.end("a:xfrm");
+    x.end("p:grpSpPr");
+
+    // sldImg placeholder
+    x.start("p:sp", &[]);
+    x.start("p:nvSpPr", &[]);
+    x.leaf("p:cNvPr", &[("id", "2"), ("name", "Slide Image Placeholder 1")]);
+    x.start("p:cNvSpPr", &[]);
+    x.leaf("a:spLocks", &[("noGrp", "1"), ("noRot", "1"), ("noChangeAspect", "1")]);
+    x.end("p:cNvSpPr");
+    x.start("p:nvPr", &[]);
+    x.leaf("p:ph", &[("type", "sldImg")]);
+    x.end("p:nvPr");
+    x.end("p:nvSpPr");
+    x.start("p:spPr", &[]);
+    x.start("a:xfrm", &[]);
+    x.leaf("a:off", &[("x", "685800"), ("y", "685800")]);
+    x.leaf("a:ext", &[("cx", "5486400"), ("cy", "4114800")]);
+    x.end("a:xfrm");
+    x.start("a:prstGeom", &[("prst", "rect")]);
+    x.leaf("a:avLst", &[]);
+    x.end("a:prstGeom");
+    x.leaf("a:noFill", &[]);
+    x.end("p:spPr");
+    x.end("p:sp");
+
+    // notes body placeholder
+    x.start("p:sp", &[]);
+    x.start("p:nvSpPr", &[]);
+    x.leaf("p:cNvPr", &[("id", "3"), ("name", "Notes Placeholder 2")]);
+    x.start("p:cNvSpPr", &[]);
+    x.leaf("a:spLocks", &[("noGrp", "1")]);
+    x.end("p:cNvSpPr");
+    x.start("p:nvPr", &[]);
+    x.leaf("p:ph", &[("type", "body"), ("idx", "1")]);
+    x.end("p:nvPr");
+    x.end("p:nvSpPr");
+    x.start("p:spPr", &[]);
+    x.start("a:xfrm", &[]);
+    x.leaf("a:off", &[("x", "685800"), ("y", "5181600")]);
+    x.leaf("a:ext", &[("cx", "5486400"), ("cy", "4114800")]);
+    x.end("a:xfrm");
+    x.start("a:prstGeom", &[("prst", "rect")]);
+    x.leaf("a:avLst", &[]);
+    x.end("a:prstGeom");
+    x.leaf("a:noFill", &[]);
+    x.end("p:spPr");
+    x.start("p:txBody", &[]);
+    x.leaf("a:bodyPr", &[("vert", "horz"), ("lIns", "91440"), ("tIns", "45720"), ("rIns", "91440"), ("bIns", "45720"), ("rtlCol", "0")]);
+    x.leaf("a:lstStyle", &[]);
+    x.start("a:p", &[]);
+    x.leaf("a:pPr", &[("lvl", "0")]);
+    x.start("a:r", &[]);
+    x.leaf("a:rPr", &[("lang", "en-US"), ("smtClean", "0")]);
+    x.text_elem("a:t", "");
+    x.end("a:r");
+    x.end("a:p");
+    x.end("p:txBody");
+    x.end("p:sp");
+
+    x.end("p:spTree");
+    x.end("p:cSld");
+    x.leaf(
+        "p:clrMap",
+        &[
+            ("bg1", "lt1"),
+            ("tx1", "dk1"),
+            ("bg2", "lt2"),
+            ("tx2", "dk2"),
+            ("accent1", "accent1"),
+            ("accent2", "accent2"),
+            ("accent3", "accent3"),
+            ("accent4", "accent4"),
+            ("accent5", "accent5"),
+            ("accent6", "accent6"),
+            ("hlink", "hlink"),
+            ("folHlink", "folHlink"),
+        ],
+    );
+    x.end("p:notesMaster");
     x.into_string().into_bytes()
 }
 fn notes_slide_xml(text: &str) -> Vec<u8> {

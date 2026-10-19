@@ -130,7 +130,7 @@ elements:
       fontSize: 11
       color: "$w50"
       text: |
-        图源与数据：<a href="https://www.xiaomiev.com/yu7">小米汽车官网 xiaomiev.com/yu7</a>
+        图源与数据：小米汽车官网 xiaomiev.com/yu7
   - elementId: page-num
     elementType: text
     bounds: [850, 500, 60, 20]

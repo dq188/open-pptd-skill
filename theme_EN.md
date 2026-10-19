@@ -290,30 +290,24 @@ The agent loads the matching `design.md` (or the numbered catalog `.md`) as the 
 
 ## Extra catalog
 
-Numbered English sheets that complement the primary catalog; invoke by theme ID the same way.
+Visual style references that complement the primary catalog, offering emotional and differentiated expressions across various industries; can also be invoked by theme ID or style description.
 
 ### Strategy
 
 #### `dusk-violet-consulting` — Dusk Violet Consulting
-
 - **Look**: Dusk-violet consulting thought-leadership report
-- **File**: [`01/en/dusk-violet-consulting.md`](skills/open-pptd/reference/design_system/01_strategy/01/en/dusk-violet-consulting.md)
 - **Invoke**: `use dusk-violet-consulting`
 
 ![Dusk Violet Consulting](docs/themes/extra/dusk-violet-consulting.jpg)
 
 #### `red-black-business` — Red Black Business
-
 - **Look**: Red-black management-consulting full-package template
-- **File**: [`04/en/red-black-business.md`](skills/open-pptd/reference/design_system/01_strategy/04/en/red-black-business.md)
 - **Invoke**: `use red-black-business`
 
 ![Red Black Business](docs/themes/extra/red-black-business.jpg)
 
 #### `map-strategy` — Cartographic Strategy
-
 - **Look**: Map strategy; internationalization / regional footprint
-- **File**: [`06/en/map-strategy.md`](skills/open-pptd/reference/design_system/01_strategy/06/en/map-strategy.md)
 - **Invoke**: `use map-strategy`
 
 ![Cartographic Strategy](docs/themes/extra/map-strategy.jpg)
@@ -321,33 +315,25 @@ Numbered English sheets that complement the primary catalog; invoke by theme ID 
 ### Business
 
 #### `xuan-paper-annual` — Xuan Paper Annual
-
 - **Look**: Xuan-paper annual; ultra-heavy headlines, editorial research journal
-- **File**: [`03/en/xuan-paper-annual.md`](skills/open-pptd/reference/design_system/02_business/03/en/xuan-paper-annual.md)
 - **Invoke**: `use xuan-paper-annual`
 
 ![Xuan Paper Annual](docs/themes/extra/xuan-paper-annual.jpg)
 
 #### `lead-gray-quarterly` — Lead Gray Quarterly
-
 - **Look**: Lead-gray quarterly; financial-newspaper data monitor
-- **File**: [`04/en/lead-gray-quarterly.md`](skills/open-pptd/reference/design_system/02_business/04/en/lead-gray-quarterly.md)
 - **Invoke**: `use lead-gray-quarterly`
 
 ![Lead Gray Quarterly](docs/themes/extra/lead-gray-quarterly.jpg)
 
 #### `ink-green-market-trends` — Ink Green Market Trends
-
 - **Look**: Ink-green market trends; dark crypto / market quarterly
-- **File**: [`05/en/ink-green-market-trends.md`](skills/open-pptd/reference/design_system/02_business/05/en/ink-green-market-trends.md)
 - **Invoke**: `use ink-green-market-trends`
 
 ![Ink Green Market Trends](docs/themes/extra/ink-green-market-trends.jpg)
 
 #### `orange-tech` — Orange Tech
-
 - **Look**: Orange tech annual report and business-insight deck
-- **File**: [`06/en/orange-tech.md`](skills/open-pptd/reference/design_system/02_business/06/en/orange-tech.md)
 - **Invoke**: `use orange-tech`
 
 ![Orange Tech](docs/themes/extra/orange-tech.jpg)
@@ -355,25 +341,19 @@ Numbered English sheets that complement the primary catalog; invoke by theme ID 
 ### Work
 
 #### `mist-blue-travelogue` — Mist Blue Travelogue
-
 - **Look**: Mist-blue travelogue; travel / hospitality industry research
-- **File**: [`02/en/mist-blue-travelogue.md`](skills/open-pptd/reference/design_system/03_work/02/en/mist-blue-travelogue.md)
 - **Invoke**: `use mist-blue-travelogue`
 
 ![Mist Blue Travelogue](docs/themes/extra/mist-blue-travelogue.jpg)
 
 #### `color-stripes-documentary` — Color Stripes Documentary
-
 - **Look**: Color-stripes documentary; impact / ESG long-form narrative
-- **File**: [`04/en/color-stripes-documentary.md`](skills/open-pptd/reference/design_system/03_work/04/en/color-stripes-documentary.md)
 - **Invoke**: `use color-stripes-documentary`
 
 ![Color Stripes Documentary](docs/themes/extra/color-stripes-documentary.jpg)
 
 #### `red-white-business` — Red White Business
-
 - **Look**: Red-white business; employer brand and org capability
-- **File**: [`06/en/red-white-business.md`](skills/open-pptd/reference/design_system/03_work/06/en/red-white-business.md)
 - **Invoke**: `use red-white-business`
 
 ![Red White Business](docs/themes/extra/red-white-business.jpg)
@@ -381,17 +361,13 @@ Numbered English sheets that complement the primary catalog; invoke by theme ID 
 ### Promotion
 
 #### `gold-orange-type-journal` — Gold Orange Type Journal
-
 - **Look**: Gold-orange type-trends journal
-- **File**: [`04/en/gold-orange-type-journal.md`](skills/open-pptd/reference/design_system/04_promotion/04/en/gold-orange-type-journal.md)
 - **Invoke**: `use gold-orange-type-journal`
 
 ![Gold Orange Type Journal](docs/themes/extra/gold-orange-type-journal.jpg)
 
 #### `fresh-brand` — Fresh Brand
-
 - **Look**: Fresh brand equity / impact report
-- **File**: [`06/en/fresh-brand.md`](skills/open-pptd/reference/design_system/04_promotion/06/en/fresh-brand.md)
 - **Invoke**: `use fresh-brand`
 
 ![Fresh Brand](docs/themes/extra/fresh-brand.jpg)
@@ -399,17 +375,13 @@ Numbered English sheets that complement the primary catalog; invoke by theme ID 
 ### Academic
 
 #### `pink-purple-diagnosis` — Soft Cloud-Layer Diagnostic Narrative
-
 - **Look**: Pink-purple cloud-layer diagnostic narrative
-- **File**: [`01/en/pink-purple-diagnosis.md`](skills/open-pptd/reference/design_system/05_academic/01/en/pink-purple-diagnosis.md)
 - **Invoke**: `use pink-purple-diagnosis`
 
 ![Soft Cloud-Layer Diagnostic Narrative](docs/themes/extra/pink-purple-diagnosis.jpg)
 
 #### `dark-themed-data` — Dark Themed Data
-
 - **Look**: Dark-themed data dashboard for crypto / market research
-- **File**: [`06/en/dark-themed-data.md`](skills/open-pptd/reference/design_system/05_academic/06/en/dark-themed-data.md)
 - **Invoke**: `use dark-themed-data`
 
 ![Dark Themed Data](docs/themes/extra/dark-themed-data.jpg)

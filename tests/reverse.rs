@@ -159,3 +159,26 @@ fn table_fixture_roundtrips_through_convert() {
         .expect("converted project must rebuild");
     let _ = fs::remove_dir_all(&work);
 }
+#[test]
+fn reverse_preserves_speaker_notes() {
+    let work = temp_dir("notes");
+    let pptx_path = work.join("with_notes.pptx");
+    let mut project = pptd::load_project(&fixture_dir().join("buildable.pptd")).unwrap();
+    project.pages[0].notes = Some("Here are the speaker rehearsal notes for slide 1.".to_string());
+
+    pptx::writer::PptxWriter::new(&project)
+        .build(&pptx_path)
+        .unwrap();
+
+    let converted = work.join("converted_notes");
+    let report = pptx::import::convert_pptx_to_pptd(&pptx_path, &converted).unwrap();
+    assert_eq!(report.page_count, 1);
+
+    let decompiled = pptd::load_project(&converted.join("deck.pptd")).unwrap();
+    assert_eq!(
+        decompiled.pages[0].notes.as_deref(),
+        Some("Here are the speaker rehearsal notes for slide 1.")
+    );
+
+    let _ = fs::remove_dir_all(&work);
+}

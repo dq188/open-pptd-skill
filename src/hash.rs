@@ -76,7 +76,7 @@ impl Records {
     /// know; the current format is authoritative.
     pub fn load(work_dir: &Path) -> Records {
         let mut records = Records::default();
-        if let Some(entries) = parse_pairs(&sidecar_path(work_dir, SYNC_SIDECAR)) {
+        if let Some(entries) = parse_pairs(&sidecar_path(work_dir, SYNC_SIDECAR), work_dir) {
             records.entries = entries;
         }
         for name in LEGACY_SIDECARS {
@@ -121,10 +121,15 @@ impl Records {
     /// Write the records and remove absorbed legacy sidecars.
     pub fn save(&self, work_dir: &Path) -> Result<()> {
         let mut text = String::new();
+        let canon_work_dir = canonical(work_dir);
         for (path, hash) in &self.entries {
             text.push_str(hash);
             text.push('\n');
-            text.push_str(&path.to_string_lossy());
+            let stored = match path.strip_prefix(&canon_work_dir) {
+                Ok(rel) => format!("./{}", rel.display()),
+                Err(_) => path.to_string_lossy().to_string(),
+            };
+            text.push_str(&stored);
             text.push('\n');
         }
         fs::write(sidecar_path(work_dir, SYNC_SIDECAR), text).map_err(|source| {
@@ -142,7 +147,7 @@ impl Records {
 
 /// Parse the multi-entry pair format. Stops at the first malformed pair,
 /// keeping the entries parsed so far.
-fn parse_pairs(path: &Path) -> Option<BTreeMap<PathBuf, String>> {
+fn parse_pairs(path: &Path, work_dir: &Path) -> Option<BTreeMap<PathBuf, String>> {
     let text = fs::read_to_string(path).ok()?;
     let mut lines = text.lines().map(str::trim).filter(|l| !l.is_empty());
     let mut entries = BTreeMap::new();
@@ -150,10 +155,16 @@ fn parse_pairs(path: &Path) -> Option<BTreeMap<PathBuf, String>> {
         if !is_hash(hash) {
             break;
         }
-        let Some(path) = lines.next() else {
+        let Some(path_str) = lines.next() else {
             break;
         };
-        entries.insert(PathBuf::from(path), hash.to_string());
+        let p = Path::new(path_str);
+        let resolved = if p.is_relative() {
+            canonical(&work_dir.join(p))
+        } else {
+            canonical(p)
+        };
+        entries.insert(resolved, hash.to_string());
     }
     Some(entries)
 }

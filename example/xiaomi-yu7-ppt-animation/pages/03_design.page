@@ -62,7 +62,7 @@ elements:
       fontFamily: MiSans
       color: "#D8DFE2"
       fontSize: 9
-      text: "数据来源：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7 外观设计</a>；数据来自小米汽车实验室"
+      text: "数据来源：小米汽车官网 YU7 外观设计；数据来自小米汽车实验室"
 animations:
   - elementId: design-title
     effect: fade-in

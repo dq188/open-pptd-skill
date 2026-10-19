@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # pptd standalone installer for open-pptd
-REPOS=("shiquda/open-pptd" "shiquda/open-pptd-skill" "shiquda/slideforge")
+REPOS=("shiquda/open-pptd-skill")
 REPO="${REPOS[0]}"
-VERSION="1.0.4"
+VERSION="1.3.5"
 INSTALL_DIR="${HOME}/.local/bin"
 FORCE=0
 
@@ -15,6 +15,9 @@ for arg in "$@"; do
       ;;
     --dir=*)
       INSTALL_DIR="${arg#*=}"
+      ;;
+    --version=*)
+      VERSION="${arg#*=}"
       ;;
     --help|-h)
       echo "Usage: $0 [--force] [--dir=/path/to/bin]"
@@ -45,15 +48,15 @@ ARCH="$(uname -m | tr '[:upper:]' '[:lower:]')"
 case "${OS}" in
   darwin)
     case "${ARCH}" in
-      arm64|aarch64) ARCHIVES=("pptd-${VERSION}-aarch64-macos.tar.gz" "slideforge-${VERSION}-aarch64-macos.tar.gz") ;;
-      x86_64|amd64)   ARCHIVES=("pptd-${VERSION}-x86_64-macos.tar.gz" "slideforge-${VERSION}-x86_64-macos.tar.gz") ;;
+      arm64|aarch64) ARCHIVES=("pptd-${VERSION}-aarch64-macos.tar.gz" "pptd-aarch64-macos.tar.gz") ;;
+      x86_64|amd64)   ARCHIVES=("pptd-${VERSION}-x86_64-macos.tar.gz" "pptd-x86_64-macos.tar.gz") ;;
       *) echo "[open-pptd] Unsupported macOS architecture: ${ARCH}" >&2; exit 1 ;;
     esac
     ;;
   linux)
     case "${ARCH}" in
-      x86_64|amd64)   ARCHIVES=("pptd-${VERSION}-x86_64-linux.tar.gz" "slideforge-${VERSION}-x86_64-linux.tar.gz") ;;
-      arm64|aarch64) ARCHIVES=("pptd-${VERSION}-aarch64-linux.tar.gz" "slideforge-${VERSION}-aarch64-linux.tar.gz") ;;
+      x86_64|amd64)   ARCHIVES=("pptd-${VERSION}-x86_64-linux.tar.gz" "pptd-x86_64-linux.tar.gz") ;;
+      arm64|aarch64) ARCHIVES=("pptd-${VERSION}-aarch64-linux.tar.gz" "pptd-aarch64-linux.tar.gz") ;;
       *) echo "[open-pptd] Unsupported Linux architecture: ${ARCH}" >&2; exit 1 ;;
     esac
     ;;
@@ -108,7 +111,7 @@ done
 if [ "$DOWNLOAD_SUCCESS" -eq 1 ]; then
   tar -xzf "${TMPDIR}/${CHOSEN_ARCHIVE}" -C "${TMPDIR}"
   BIN_FOUND=""
-  for b in "pptd" "open-pptd" "slideforge"; do
+  for b in "pptd" "open-pptd"; do
     if [ -f "${TMPDIR}/${b}" ]; then
       BIN_FOUND="${TMPDIR}/${b}"
       break
@@ -124,6 +127,15 @@ if [ "$DOWNLOAD_SUCCESS" -eq 1 ]; then
     fi
     echo "[open-pptd] Successfully installed pptd to ${INSTALL_DIR}/pptd"
     "${INSTALL_DIR}/pptd" --version
+    if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
+      echo ""
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo "[open-pptd] NOTICE: ${INSTALL_DIR} is not in your current PATH."
+      echo "[open-pptd] To invoke 'pptd' directly, run:"
+      echo "    export PATH=\"${INSTALL_DIR}:\$PATH\""
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      echo ""
+    fi
     exit 0
   fi
 fi

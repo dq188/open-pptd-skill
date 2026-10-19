@@ -184,7 +184,7 @@ elements:
       color: "$w50"
       lineHeight: 1.6
       text: |
-        数据来源：<a href="https://www.xiaomiev.com/yu7">小米汽车官网 xiaomiev.com/yu7</a>，2026 年 8 月抓取。续航、电压等数据来自小米汽车实验室，配置区分车型版本。
+        数据来源：小米汽车官网 xiaomiev.com/yu7，2026 年 8 月抓取。续航、电压等数据来自小米汽车实验室，配置区分车型版本。
   - elementId: page-num
     elementType: text
     bounds: [850, 500, 60, 20]

@@ -290,30 +290,24 @@ Agent 会读取对应 `design.md`（或补充目录下的同名 `.md`）作为�
 
 ## 补充目录
 
-与主目录互补的编号英文稿；同样可按主题 ID 点名。
+与主目录互补的视觉风格样张，提供不同行业的情绪化与差异化表达；同样可按主题 ID 或风格描述点名生成。
 
 ### 策略 · Strategy
 
 #### `dusk-violet-consulting` — Dusk Violet Consulting
-
 - **风格**: 暮紫咨询思想领导力报告风
-- **文件**: [`01/en/dusk-violet-consulting.md`](skills/open-pptd/reference/design_system/01_strategy/01/en/dusk-violet-consulting.md)
 - **点名**: `用 dusk-violet-consulting`
 
 ![Dusk Violet Consulting](docs/themes/extra/dusk-violet-consulting.jpg)
 
 #### `red-black-business` — Red Black Business
-
 - **风格**: 红黑管理咨询全案模板风
-- **文件**: [`04/en/red-black-business.md`](skills/open-pptd/reference/design_system/01_strategy/04/en/red-black-business.md)
 - **点名**: `用 red-black-business`
 
 ![Red Black Business](docs/themes/extra/red-black-business.jpg)
 
 #### `map-strategy` — Cartographic Strategy
-
 - **风格**: 地图战略风，国际化/区域布局
-- **文件**: [`06/en/map-strategy.md`](skills/open-pptd/reference/design_system/01_strategy/06/en/map-strategy.md)
 - **点名**: `用 map-strategy`
 
 ![Cartographic Strategy](docs/themes/extra/map-strategy.jpg)
@@ -321,33 +315,25 @@ Agent 会读取对应 `design.md`（或补充目录下的同名 `.md`）作为�
 ### 商务 · Business
 
 #### `xuan-paper-annual` — Xuan Paper Annual
-
 - **风格**: 宣纸年刊风，超重标题编辑研究刊
-- **文件**: [`03/en/xuan-paper-annual.md`](skills/open-pptd/reference/design_system/02_business/03/en/xuan-paper-annual.md)
 - **点名**: `用 xuan-paper-annual`
 
 ![Xuan Paper Annual](docs/themes/extra/xuan-paper-annual.jpg)
 
 #### `lead-gray-quarterly` — Lead Gray Quarterly
-
 - **风格**: 铅灰季报风，财经报纸式数据监测
-- **文件**: [`04/en/lead-gray-quarterly.md`](skills/open-pptd/reference/design_system/02_business/04/en/lead-gray-quarterly.md)
 - **点名**: `用 lead-gray-quarterly`
 
 ![Lead Gray Quarterly](docs/themes/extra/lead-gray-quarterly.jpg)
 
 #### `ink-green-market-trends` — Ink Green Market Trends
-
 - **风格**: 墨绿行情风，深色加密/市场季报
-- **文件**: [`05/en/ink-green-market-trends.md`](skills/open-pptd/reference/design_system/02_business/05/en/ink-green-market-trends.md)
 - **点名**: `用 ink-green-market-trends`
 
 ![Ink Green Market Trends](docs/themes/extra/ink-green-market-trends.jpg)
 
 #### `orange-tech` — Orange Tech
-
 - **风格**: 橙色科技年报与商业洞察风
-- **文件**: [`06/en/orange-tech.md`](skills/open-pptd/reference/design_system/02_business/06/en/orange-tech.md)
 - **点名**: `用 orange-tech`
 
 ![Orange Tech](docs/themes/extra/orange-tech.jpg)
@@ -355,25 +341,19 @@ Agent 会读取对应 `design.md`（或补充目录下的同名 `.md`）作为�
 ### 工作 · Work
 
 #### `mist-blue-travelogue` — Mist Blue Travelogue
-
 - **风格**: 雾蓝游记风，旅行酒店行业研究
-- **文件**: [`02/en/mist-blue-travelogue.md`](skills/open-pptd/reference/design_system/03_work/02/en/mist-blue-travelogue.md)
 - **点名**: `用 mist-blue-travelogue`
 
 ![Mist Blue Travelogue](docs/themes/extra/mist-blue-travelogue.jpg)
 
 #### `color-stripes-documentary` — Color Stripes Documentary
-
 - **风格**: 彩条纪实风，影响力/ESG 长叙事
-- **文件**: [`04/en/color-stripes-documentary.md`](skills/open-pptd/reference/design_system/03_work/04/en/color-stripes-documentary.md)
 - **点名**: `用 color-stripes-documentary`
 
 ![Color Stripes Documentary](docs/themes/extra/color-stripes-documentary.jpg)
 
 #### `red-white-business` — Red White Business
-
 - **风格**: 红白商务风，雇主品牌与组织能力
-- **文件**: [`06/en/red-white-business.md`](skills/open-pptd/reference/design_system/03_work/06/en/red-white-business.md)
 - **点名**: `用 red-white-business`
 
 ![Red White Business](docs/themes/extra/red-white-business.jpg)
@@ -381,17 +361,13 @@ Agent 会读取对应 `design.md`（或补充目录下的同名 `.md`）作为�
 ### 推广 · Promotion
 
 #### `gold-orange-type-journal` — Gold Orange Type Journal
-
 - **风格**: 金橙字体趋势刊风
-- **文件**: [`04/en/gold-orange-type-journal.md`](skills/open-pptd/reference/design_system/04_promotion/04/en/gold-orange-type-journal.md)
 - **点名**: `用 gold-orange-type-journal`
 
 ![Gold Orange Type Journal](docs/themes/extra/gold-orange-type-journal.jpg)
 
 #### `fresh-brand` — Fresh Brand
-
 - **风格**: 清新品牌权益/影响力报告风
-- **文件**: [`06/en/fresh-brand.md`](skills/open-pptd/reference/design_system/04_promotion/06/en/fresh-brand.md)
 - **点名**: `用 fresh-brand`
 
 ![Fresh Brand](docs/themes/extra/fresh-brand.jpg)
@@ -399,17 +375,13 @@ Agent 会读取对应 `design.md`（或补充目录下的同名 `.md`）作为�
 ### 学术 · Academic
 
 #### `pink-purple-diagnosis` — Soft Cloud-Layer Diagnostic Narrative
-
 - **风格**: 粉紫云层诊断叙事风
-- **文件**: [`01/en/pink-purple-diagnosis.md`](skills/open-pptd/reference/design_system/05_academic/01/en/pink-purple-diagnosis.md)
 - **点名**: `用 pink-purple-diagnosis`
 
 ![Soft Cloud-Layer Diagnostic Narrative](docs/themes/extra/pink-purple-diagnosis.jpg)
 
 #### `dark-themed-data` — Dark Themed Data
-
 - **风格**: 深色数据主题，加密/市场研究仪表盘
-- **文件**: [`06/en/dark-themed-data.md`](skills/open-pptd/reference/design_system/05_academic/06/en/dark-themed-data.md)
 - **点名**: `用 dark-themed-data`
 
 ![Dark Themed Data](docs/themes/extra/dark-themed-data.jpg)

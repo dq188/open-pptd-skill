@@ -13,8 +13,10 @@ pub enum ContentType {
     SlideMaster,
     SlideLayout,
     NotesSlide,
+    NotesMaster,
     Theme,
     CoreProperties,
+    AppProperties,
     ImagePng,
     ImageJpeg,
 }
@@ -38,9 +40,15 @@ impl ContentType {
             ContentType::NotesSlide => {
                 "application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml"
             }
+            ContentType::NotesMaster => {
+                "application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml"
+            }
             ContentType::Theme => "application/vnd.openxmlformats-officedocument.theme+xml",
             ContentType::CoreProperties => {
                 "application/vnd.openxmlformats-package.core-properties+xml"
+            }
+            ContentType::AppProperties => {
+                "application/vnd.openxmlformats-officedocument.extended-properties+xml"
             }
             ContentType::ImagePng => "image/png",
             ContentType::ImageJpeg => "image/jpeg",

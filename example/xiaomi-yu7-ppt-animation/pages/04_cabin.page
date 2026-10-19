@@ -62,7 +62,7 @@ elements:
       fontFamily: MiSans
       color: "#D8DFE2"
       fontSize: 9
-      text: "资料来源：<a href=\"https://www.mi.com/global/discover/article?id=5174\">Xiaomi Global · YU7 cabin</a>；图源：小米汽车官网"
+      text: "资料来源：Xiaomi Global · YU7 cabin；图源：小米汽车官网"
 animations:
   - elementId: cabin-title
     effect: fly-in

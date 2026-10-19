@@ -24,12 +24,12 @@ import zipfile
 from pathlib import Path
 from typing import Optional, Tuple
 
-REPO = "shiquda/open-pptd"
-REPO_CANDIDATES = ["shiquda/open-pptd", "shiquda/open-pptd-skill", "shiquda/slideforge"]
-VERSION = "1.0.4"
+REPO = "shiquda/open-pptd-skill"
+REPO_CANDIDATES = ["shiquda/open-pptd-skill"]
+VERSION = "1.3.5"
 
 
-def detect_target() -> Optional[Tuple[str, list[str]]]:
+def detect_target(version: str = VERSION) -> Optional[Tuple[str, list[str]]]:
     """Return (target_triple, candidate_archive_names)."""
     system = platform.system().lower()
     machine = platform.machine().lower()
@@ -38,29 +38,29 @@ def detect_target() -> Optional[Tuple[str, list[str]]]:
         if machine in ("arm64", "aarch64"):
             return (
                 "aarch64-apple-darwin",
-                [f"pptd-{VERSION}-aarch64-macos.tar.gz", f"slideforge-{VERSION}-aarch64-macos.tar.gz"],
+                [f"pptd-{version}-aarch64-macos.tar.gz", "pptd-aarch64-macos.tar.gz"],
             )
         elif machine in ("x86_64", "amd64"):
             return (
                 "x86_64-apple-darwin",
-                [f"pptd-{VERSION}-x86_64-macos.tar.gz", f"slideforge-{VERSION}-x86_64-macos.tar.gz"],
+                [f"pptd-{version}-x86_64-macos.tar.gz", "pptd-x86_64-macos.tar.gz"],
             )
     elif system == "linux":
         if machine in ("x86_64", "amd64"):
             return (
                 "x86_64-unknown-linux-gnu",
-                [f"pptd-{VERSION}-x86_64-linux.tar.gz", f"slideforge-{VERSION}-x86_64-linux.tar.gz"],
+                [f"pptd-{version}-x86_64-linux.tar.gz", "pptd-x86_64-linux.tar.gz"],
             )
         elif machine in ("aarch64", "arm64"):
             return (
                 "aarch64-unknown-linux-gnu",
-                [f"pptd-{VERSION}-aarch64-linux.tar.gz", f"slideforge-{VERSION}-aarch64-linux.tar.gz"],
+                [f"pptd-{version}-aarch64-linux.tar.gz", "pptd-aarch64-linux.tar.gz"],
             )
     elif system == "windows":
         if machine in ("x86_64", "amd64"):
             return (
                 "x86_64-pc-windows-msvc",
-                [f"pptd-{VERSION}-x86_64-windows.zip", f"slideforge-{VERSION}-x86_64-windows.zip"],
+                [f"pptd-{version}-x86_64-windows.zip", "pptd-x86_64-windows.zip"],
             )
 
     return None
@@ -132,7 +132,7 @@ def fetch_checksums(version: str) -> dict[str, str]:
 
 
 def install_from_release(dest_dir: Path, version: str = VERSION) -> Path:
-    target_info = detect_target()
+    target_info = detect_target(version)
     if not target_info:
         raise RuntimeError(
             f"Unsupported operating system or CPU architecture: system='{platform.system()}', machine='{platform.machine()}'.\n"
@@ -192,7 +192,7 @@ def install_from_release(dest_dir: Path, version: str = VERSION) -> Path:
     dest_path = dest_dir / target_bin_name
 
     extracted = False
-    valid_names = {"pptd", "pptd.exe", "open-pptd", "open-pptd.exe", "slideforge", "slideforge.exe"}
+    valid_names = {"pptd", "pptd.exe", "open-pptd", "open-pptd.exe"}
     if chosen_archive.endswith(".tar.gz") or chosen_archive.endswith(".tgz"):
         with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
             for member in tar.getmembers():
@@ -217,17 +217,16 @@ def install_from_release(dest_dir: Path, version: str = VERSION) -> Path:
 
     dest_path.chmod(dest_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-    # Also create slideforge alias if needed for legacy compatibility
-    legacy_bin = dest_dir / ("slideforge.exe" if is_win else "slideforge")
-    if not legacy_bin.exists():
+    # Create open-pptd symlink/copy if needed
+    open_pptd_bin = dest_dir / ("open-pptd.exe" if is_win else "open-pptd")
+    if not open_pptd_bin.exists():
         try:
-            legacy_bin.symlink_to(dest_path.name)
+            open_pptd_bin.symlink_to(dest_path.name)
         except Exception:
             try:
-                shutil.copy2(dest_path, legacy_bin)
+                shutil.copy2(dest_path, open_pptd_bin)
             except Exception:
                 pass
-
     print(f"[open-pptd] Installed pptd to: {dest_path}")
     return dest_path
 
@@ -272,7 +271,7 @@ def print_manual_install_instructions(dest_dir: Path) -> None:
     print("=" * 70 + "\n", file=sys.stderr)
 
 
-def ensure_pptd(force_reinstall: bool = False, install_dir: Optional[Path] = None) -> Path:
+def ensure_pptd(force_reinstall: bool = False, install_dir: Optional[Path] = None, version: str = VERSION) -> Path:
     if not force_reinstall:
         existing = find_pptd()
         if existing:
@@ -284,7 +283,7 @@ def ensure_pptd(force_reinstall: bool = False, install_dir: Optional[Path] = Non
     errors = []
     # 1. Try download prebuilt release
     try:
-        return install_from_release(install_dir)
+        return install_from_release(install_dir, version=version)
     except Exception as e:
         errors.append(f"Release download: {e}")
         print(f"[open-pptd] Precompiled binary download failed: {e}", file=sys.stderr)
@@ -328,9 +327,23 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        bin_path = ensure_pptd(force_reinstall=args.force, install_dir=args.dir)
+        bin_path = ensure_pptd(force_reinstall=args.force, install_dir=args.dir, version=args.version)
         proc = subprocess.run([str(bin_path), "--version"], capture_output=True, text=True, check=True)
-        print(f"[open-pptd] Success! {proc.stdout.strip()} is ready at {bin_path}.")
+        version_str = proc.stdout.strip()
+        print(f"[open-pptd] Success! {version_str} is ready at: {bin_path}")
+
+        path_env = os.environ.get("PATH", "")
+        path_dirs = [Path(p).resolve() for p in path_env.split(os.pathsep) if p.strip()]
+        bin_dir = bin_path.parent.resolve()
+        if bin_dir not in path_dirs:
+            print("\n" + "!" * 68)
+            print(f"[open-pptd] NOTICE: '{bin_dir}' is not in your current PATH environment.")
+            print(f"[open-pptd] To invoke 'pptd' directly from anywhere, run:")
+            print(f"    export PATH=\"{bin_dir}:$PATH\"")
+            print(f"[open-pptd] Or add that line to your ~/.bashrc / ~/.zshrc.")
+            print(f"[open-pptd] You can also invoke the compiler using its full path:")
+            print(f"    {bin_path} --help")
+            print("!" * 68 + "\n")
         return 0
     except Exception as err:
         print(f"[open-pptd] Installation error: {err}", file=sys.stderr)

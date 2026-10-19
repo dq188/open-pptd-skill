@@ -99,7 +99,7 @@ elements:
       fontSize: 11
       color: "$w50"
       text: |
-        图源：<a href="https://www.xiaomiev.com/yu7">小米汽车官网</a> · 风阻数据来自中国汽研重庆风洞实验室
+        图源：小米汽车官网 · 风阻数据来自中国汽研重庆风洞实验室
   - elementId: page-num
     elementType: text
     bounds: [850, 500, 60, 20]

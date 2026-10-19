@@ -11,26 +11,32 @@ description: Create, edit, reverse-decompile, and export presentations using the
 
 ## ⚡ Agent Quickstart (极速闭环与失败处理)
 
+> **路径说明**：下文中的 `<SKILL_DIR>` 指代本 Skill 所在安装目录（全局安装时通常为 `~/.agents/skills/open-pptd`，或工作区内的 `skills/open-pptd`）。
+
 Agent 接到任何 PPT 制作或修改任务后，必须遵循以下闭环命令链：
 
 ```bash
 # 1. 安装与就绪检查 (已安装即刻返回)
-python3 skills/open-pptd/scripts/install_binary.py
+python3 <SKILL_DIR>/scripts/install_binary.py
 # ➔ 若网络受限导致下载失败：脚本会自动回退至 cargo 源码编译；若仍失败，请根据终端提示手动下载放置
+# ➔ 若提示 command not found，执行 export PATH="$HOME/.local/bin:$PATH"
 
 # 2. 严格语义与结构校验
 pptd check <project_dir>/deck.pptd
 # ➔ 若 check 报错：根据错误提示逐一排查拼写错误、非法 shapeName、未定义 $color 或缺失的图片路径
 
 # 3. 极速编译为原生 PPTX
-pptd build <project_dir>/deck.pptd -o <output.pptx>
-# ➔ 若因 .sync.hash 覆写守卫报错退出 (退出码 2)：说明 output.pptx 已被外部修改。若需强制覆盖，先 rm <output.pptx>
+pptd build <project_dir>/deck.pptd -o <output.pptx> [--force]
+# ➔ 若因 .sync.hash 覆写守卫报错退出 (退出码 2)：说明 output.pptx 已被外部修改。若需强制覆盖，加 --force 参数或先 rm <output.pptx>
 
 # 4. 成品全面验证与质检
-python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages <N> --check-notes
+python3 <SKILL_DIR>/scripts/validate_pptx.py <output.pptx> --expected-pages <N> --check-notes
 # ➔ 若报 leaked HTML tag：检查源码中是否有未转换的 <ul>/<li>/<a> 标签，改用普通文本段落与标号
-```
 
+# 5. 渲染预览与看图排版 (视觉质检)
+python3 <SKILL_DIR>/scripts/validate_pptx.py <output.pptx> --render-images
+# ➔ 导出逐页 PNG 与总览联络单 (contact-sheet.jpg)，便于检查连线是否穿过文字、标签是否出界及留白均衡度
+```
 ---
 
 ## 📚 Agent 必读顺序 (Document Reading Order)
@@ -38,7 +44,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 在动手编写 PPTD 代码前，建议严格按照以下顺序查阅相关规范：
 1. **场景判断**：阅读 `reference/slides_categories.md`，判断文稿归属的业务场景（咨询/汇报/学术/技术等）与核心叙事目标。
 2. **版式与密度红线**：根据场景阅读 `reference/slides_categories/<scenario>.md`，掌握信息密度、禁止项与推荐版式结构。
-3. **预设主题选择**：查阅 `theme.md`（英文参见 `theme_EN.md`），直接点名或参考其中 30 余种精美的主题调色盘与版式规范。
+3. **预设主题选择**：查阅本 Skill 目录下的 `theme.md`（英文参见 `theme_EN.md`），直接点名或参考其中 30 余种精美的主题调色盘与版式规范。
 4. **跨平台字体回退**：查阅 `reference/fonts.md`，了解 Windows / macOS / Linux 字体映射机制，避免字体缺失导致错乱。
 5. **语法与能力边界**：查阅下文的【功能支持矩阵】以及 `reference/pptd.md`（注意：仅使用编译器已支持的能力）。
 
@@ -51,10 +57,11 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 | 功能类别 | 支持状态 | 规范与说明 / 替代指引 |
 |---|---|---|
 | **文本与排版** | ✅ 完全支持 | `fontSize`, `color`, `bold`, `italic`, `lineHeight`, `align`, `valign`, `letterSpacing`, `shape`, `padding` |
-| **富文本标签** | ✅ 支持 | `<p>`, `<span>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<u>` (下划线), `<s>`/`<del>`/`<strike>` (删除线), `<code>`, `<latex>` / `\( ... \)` (原生公式) |
+| **富文本标签** | ✅ 完全支持 | `<p>`, `<span>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<u>` (下划线), `<s>`/`<del>`/`<strike>` (删除线), `<code>` (等宽), `<latex>` / `\( ... \)` (行内公式，支持 `\frac`、上下标、常用数学符号) |
 | **列表与超链接标签** | ❌ **严禁使用** | `<ul>`, `<ol>`, `<li>`, `<a>` **不受支持**！编译器与校验器会**直接拦截报错**。列表必须写成常规段落并手写序号（如 `1. 第一点` 或 `• 第一点`） |
 | **演讲者备注 (Notes)** | ✅ 完全支持 | 页面根级属性 `notes: "备注内容..."`，自动生成原生 PowerPoint 演讲者备注 (`notesSlide`) |
 | **图表 / Charts** | ❌ **编译器尚未支持** | `elementType: chart` 会在 `check` 和 `build` 时被**直接报错拦截**。替代方案：使用原生表格 (`elementType: table`) 呈现数据，或使用脚本将图表导出为图片 (`elementType: image`) |
+| **动画效果** | 🟡 **仅解析不报错** | 编译器支持 `animations` 节点语法解析，但当前版本生成的 OOXML 暂缓写入时序动画，文稿以纯静态排版完整呈现 |
 | **矢量形状 / Shapes** | ✅ 完全支持 | `rect`, `roundRect`, `ellipse`, `triangle`, `diamond`, `rightArrow`, `pentagon`, `hexagon`, `callout` 等 DrawingML 预设形状 |
 | **线条与箭头** | ✅ 完全支持 | `elementType: line`，支持相对坐标 `points: "0,0 dx,dy"`，以及两端箭头 `arrow: [start, end]` (可选: `triangle`, `stealth`, `arrow`, `diamond`, `oval`, `none`) |
 | **表格 / Tables** | ✅ 完全支持 | 原生 PowerPoint 表格 (`<a:tbl>`)，支持 `columnWidths`、`rowHeights`、单元格跨行跨列、边框样式、底色填充 |
@@ -71,7 +78,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py <output.pptx> --expected-pages
 1. **防覆盖守卫 (Overwrite Guard)**：
    - 执行 `pptd build deck.pptd -o presentation.pptx` 时，若输出文件 `presentation.pptx` 已存在，编译器会比对当前文件的实时哈希与 `.sync.hash` 的记录。
    - **若文件被外部程序或人类手工编辑过**，编译器会**拒绝覆写**（退出码 2，提示 `changed after its last recorded sync point`），防止破坏未知修改。
-   - **如何解决**：若确认需要以 PPTD 代码强制覆写，删除已有 `.pptx` 文件后再运行 `build` 即可。
+   - **如何解决**：若确认需要以 PPTD 代码强制覆写，在命令中追加 `--force`（或 `-f`）参数，或者删除已有 `.pptx` 文件后再运行 `build` 即可：`pptd build deck.pptd -o presentation.pptx --force`
 2. **跳过未变更的 Convert**：
    - 执行 `pptd convert presentation.pptx output_dir/` 时，若源 PPTX 的 SHA-256 与上次记录一致，编译器将自动输出 `unchanged → skipped convert` 并跳过，保护本地已有的 PPTD 源码不被重复覆写。
 
@@ -152,8 +159,8 @@ elements:
 
 ### 1. 安装 / 确保编译器就绪
 ```bash
-python3 skills/open-pptd/scripts/install_binary.py
-# 如需强制重新下载: python3 skills/open-pptd/scripts/install_binary.py --force
+python3 <SKILL_DIR>/scripts/install_binary.py
+# 如需强制重新下载: python3 <SKILL_DIR>/scripts/install_binary.py --force
 ```
 
 ### 2. 严格语义检查 (Check)
@@ -167,7 +174,7 @@ pptd check deck.pptd
 pptd build deck.pptd -o output.pptx
 
 # 或通过 Python 包装脚本:
-python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
+python3 <SKILL_DIR>/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 ```
 
 ### 4. 逆向反编译 PPTX 为 PPTD 工程 (Convert)
@@ -177,12 +184,12 @@ python3 skills/open-pptd/scripts/export_pptx.py deck.pptd -o output.pptx [--pdf]
 pptd convert input.pptx my_project_dir/
 
 # 或通过 Python 包装脚本:
-python3 skills/open-pptd/scripts/convert_pptx.py input.pptx -o my_project_dir/
+python3 <SKILL_DIR>/scripts/convert_pptx.py input.pptx -o my_project_dir/
 ```
 
 ### 5. 成品全面验证与视觉质检 (Validate)
 ```bash
-python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8 --check-notes
+python3 <SKILL_DIR>/scripts/validate_pptx.py output.pptx --expected-pages 8 --check-notes
 ```
 
 ---
@@ -209,7 +216,7 @@ python3 skills/open-pptd/scripts/validate_pptx.py output.pptx --expected-pages 8
 1. **Python 环境要求**：
    - Python ≥ 3.9。
    - 核心构建无外部 Python 库硬依赖（标准库即可驱动）。
-   - 可选高级功能依赖见 `skills/open-pptd/scripts/requirements.txt`：
+   - 可选高级功能依赖见 `<SKILL_DIR>/scripts/requirements.txt`：
      - `Pillow`：用于多页全景预览图拼接 (`export_images.py`)。
      - 系统级 `libreoffice` / `soffice` / `pdftoppm`：用于在无 macOS 视窗环境下进行 PPTX 到 PDF 及高分辨率 PNG 的无头渲染。
 2. **Linux 下渲染字体替换注意**：

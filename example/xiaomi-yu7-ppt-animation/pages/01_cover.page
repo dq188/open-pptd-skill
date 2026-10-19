@@ -51,7 +51,7 @@ elements:
       fontFamily: MiSans
       color: "#D8DFE2"
       fontSize: 9
-      text: "图片 / 资料：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7</a>（访问：2026-08-06）"
+      text: "图片 / 资料：小米汽车官网 YU7（访问：2026-08-06）"
 animations:
   - elementId: cover-title
     effect: zoom-in

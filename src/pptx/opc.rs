@@ -18,6 +18,8 @@ pub mod ns {
     pub const DCTERMS: &str = "http://purl.org/dc/terms/";
     pub const DCMITYPE: &str = "http://purl.org/dc/dcmitype/";
     pub const XSI: &str = "http://www.w3.org/2001/XMLSchema-instance";
+    pub const EXTENDED_PROPS: &str =
+        "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
     /// The Kimi/PPTD extension namespace (icons, element metadata).
     pub const PPTD: &str = "https://kimi-design.msh.team/pptd/2026";
 }
@@ -45,8 +47,11 @@ pub mod rel_kind {
         "http://schemas.openxmlformats.org/officeDocument/2006/relationships/video";
     pub const AUDIO: &str =
         "http://schemas.openxmlformats.org/officeDocument/2006/relationships/audio";
+    pub const NOTES_MASTER: &str =
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster";
+    pub const EXTENDED_PROPERTIES: &str =
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties";
 }
-
 /// One relationship inside a `.rels` file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rel {

@@ -25,15 +25,15 @@ It completely eliminates brittle dependencies on web sessions, headless browsers
 Please install and set up the open-pptd presentation skill for me:
 1. Run the skill installation command:
    npx skills add https://github.com/shiquda/open-pptd-skill -g -y
-2. Follow the instructions in the skill directory (SKILL.md) and run the installer script to ensure the native `pptd` compiler is ready:
-   python3 skills/open-pptd/scripts/install_binary.py
-3. Run `pptd --version` in terminal to verify installation;
-4. Notify me when setup is complete, so I can start asking you to create editable PPTX presentations.
+2. Run the skill installer script to ensure the native `pptd` compiler is ready (use the absolute path or cd to skill dir):
+   python3 ~/.agents/skills/open-pptd/scripts/install_binary.py
+3. Verify compiler: run `pptd --version` in terminal; if command not found, run `export PATH="$HOME/.local/bin:$PATH"`;
+4. Notify me when setup is complete and ready.
 ```
 
 > **Installation Command Notes**:
 > - **Standard Ecosystem Command (Recommended)**: Use standard skill managers via `npx skills add https://github.com/shiquda/open-pptd-skill -g -y` (or `npx skills add shiquda/open-pptd-skill -g -y`).
-> - **Direct npm/npx Compatibility**: You can also use `npx github:shiquda/open-pptd install -y`.
+> - **Direct npm/npx Compatibility**: You can also use `npx github:shiquda/open-pptd-skill install -y`.
 
 ---
 
@@ -45,7 +45,7 @@ Once configured, simply describe your presentation goals to your agent. **The ag
 
 ```text
 Use open-pptd to create an 8-slide keynote presentation on "Distributed Systems Architecture Evolution":
-- Theme style: Dark Tech (dark-themed-data)
+- Theme style: Dark Fintech (ebony-ledger) or Deep Blue Academic (deep-blue-atlas)
 - Content requirements:
   1. Cover, architectural pain points, blueprint diagram (with arrowed connectors and vector cards), and performance metric comparison table;
   2. Every slide must include speaker rehearsal notes (notes: "...");
@@ -130,13 +130,13 @@ If you need to invoke the `pptd` compiler directly in your terminal for debuggin
 ### 1. Manual CLI Installation
 ```bash
 # Method A: Automatic download script to ~/.local/bin/pptd
-curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd/main/skills/open-pptd/scripts/install_binary.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shiquda/open-pptd-skill/main/skills/open-pptd/scripts/install_binary.sh | bash
 
 # Method B: Cross-platform Python installer
 python3 skills/open-pptd/scripts/install_binary.py
 
 # Method C: Install from source using Cargo
-cargo install --git https://github.com/shiquda/open-pptd.git
+cargo install --git https://github.com/shiquda/open-pptd-skill.git
 ```
 
 ### 2. Core CLI Commands

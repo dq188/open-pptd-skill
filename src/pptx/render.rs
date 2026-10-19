@@ -859,8 +859,8 @@ fn render_text(
         return Ok(());
     }
 
-    // Rich text (`<p>`/`<span>`/`<strong>` …): parse paragraph + run styles.
-    if text.content.text.contains('<') {
+    // Rich text (`<p>`/`<span>`/`<strong>` …) or math formulas: parse paragraph + run styles.
+    if text.content.text.contains('<') || text.content.text.contains("\\(") {
         xml.start("p:txBody", &[]);
         render_rich_body(
             xml,
@@ -1206,6 +1206,19 @@ fn parse_runs(inner: &str) -> Vec<RichRun> {
             } else if name == "/s" || name == "/strike" || name == "/del" {
                 flush(&mut out, &mut buf, &flags);
                 flags.strike = None;
+            } else if name == "code" {
+                flush(&mut out, &mut buf, &flags);
+                flags.family = Some("Consolas".to_string());
+                flags.styled = true;
+            } else if name == "/code" {
+                flush(&mut out, &mut buf, &flags);
+                flags.family = None;
+            } else if name == "latex" {
+                flush(&mut out, &mut buf, &flags);
+                buf.push_str("\\(");
+            } else if name == "/latex" {
+                buf.push_str("\\)");
+                flush(&mut out, &mut buf, &flags);
             } else if name == "span" {
                 flush(&mut out, &mut buf, &flags);
                 flags = Flags::default();

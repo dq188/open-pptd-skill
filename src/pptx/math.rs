@@ -238,6 +238,18 @@ pub fn latex_to_segments(src: &str) -> Vec<Segment> {
                             cur.push_str(&group);
                             j = k;
                         }
+                    } else if matches!(name.as_str(), "frac" | "dfrac" | "tfrac") {
+                        if j < chars.len() && chars[j] == '{' {
+                            let mut k = j;
+                            let num = read_script(&chars, &mut k);
+                            let den = if k < chars.len() && chars[k] == '{' {
+                                read_script(&chars, &mut k)
+                            } else {
+                                String::new()
+                            };
+                            cur.push_str(&format!("{num}/{den}"));
+                            j = k;
+                        }
                     } else if let Some(symbol) = command_symbol(&name) {
                         cur.push_str(symbol);
                     } else {
@@ -325,7 +337,13 @@ mod tests {
     }
 
     #[test]
+    fn frac_renders_as_slash() {
+        assert_eq!(joined("\\frac{1}{2}"), "1/2");
+        assert_eq!(joined("\\frac{70}{16}"), "70/16");
+    }
+
+    #[test]
     fn unknown_command_passes_through() {
-        assert_eq!(joined("\\frac{1}{2}"), "\\frac12");
+        assert_eq!(joined("\\customcmd{foo}"), "\\customcmdfoo");
     }
 }

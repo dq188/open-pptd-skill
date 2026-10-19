@@ -53,7 +53,7 @@ elements:
       fontFamily: MiSans
       color: "#D8DFE2"
       fontSize: 9
-      text: "数据来源：<a href=\"https://www.mi.com/global/discover/article?id=4925\">Xiaomi Global · YU7 launch</a>；图片：小米汽车官网"
+      text: "数据来源：Xiaomi Global · YU7 launch；图片：小米汽车官网"
 animations:
   - elementId: perf-title
     effect: fly-in

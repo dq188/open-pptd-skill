@@ -48,6 +48,9 @@ pub enum Command {
         /// Output `.pptx` path; defaults to `<entry basename>.pptx`.
         #[arg(short, long)]
         output: Option<PathBuf>,
+        /// Force build, bypassing .sync.hash overwrite protection.
+        #[arg(short, long)]
+        force: bool,
     },
     /// Reverse-compile an existing `.pptx` package into a PPTD project.
     ///
@@ -69,7 +72,7 @@ impl Cli {
         match self.command {
             Command::Check { file } => run_check(&file),
             Command::Dump { file } => run_dump(&file),
-            Command::Build { file, output } => run_build(&file, output.as_deref()),
+            Command::Build { file, output, force } => run_build(&file, output.as_deref(), force),
             Command::Convert { file, output } => run_convert(&file, &output),
         }
     }
@@ -199,7 +202,7 @@ fn run_dump(entry: &Path) -> i32 {
     0
 }
 
-fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
+fn run_build(entry: &Path, output: Option<&Path>, force: bool) -> i32 {
     let project = match load(entry) {
         Ok(project) => project,
         Err(err) => {
@@ -227,7 +230,7 @@ fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
     // wrote it (convert or build). Anything else — no record, a record for a
     // different file, or a hash mismatch — refuses: overwriting a file the
     // PPTD cannot vouch for could silently destroy external edits.
-    if output_path.exists() {
+    if output_path.exists() && !force {
         let verdict = match hash::classify_output(&output_path, &project.root_dir) {
             Ok(verdict) => verdict,
             Err(err) => {
@@ -240,14 +243,15 @@ fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
             InSync => {}
             Stale => {
                 eprintln!(
-                    "refusing to build: {} changed after its last recorded sync point (external edit?) and these changes are NOT in the PPTD",
+                    "refusing to build: {} changed after its last recorded sync point (external edit?)",
                     output_path.display()
                 );
-                eprintln!("  building now would permanently overwrite them.");
+                eprintln!("  building now would permanently overwrite those changes.");
                 eprintln!(
-                    "  fix: run `pptd convert {} {}` first to absorb the external changes,",
+                    "  fix: pass --force (or -f) to overwrite anyway:\n    pptd build {} -o {} --force\n  or delete the file:\n    rm {}",
+                    entry.display(),
                     output_path.display(),
-                    project.root_dir.display()
+                    output_path.display()
                 );
                 return 2;
             }
@@ -260,11 +264,11 @@ fn run_build(entry: &Path, output: Option<&Path>) -> i32 {
                     "  overwriting it could destroy external edits that are not in the PPTD."
                 );
                 eprintln!(
-                    "  fix: run `pptd convert {} {}` first to make it the editable baseline,",
+                    "  fix: pass --force (or -f) to overwrite anyway:\n    pptd build {} -o {} --force\n  or delete the file:\n    rm {}",
+                    entry.display(),
                     output_path.display(),
-                    project.root_dir.display()
+                    output_path.display()
                 );
-                eprintln!("  or pass a different --output path.");
                 return 2;
             }
         }

@@ -61,9 +61,10 @@ def export_images(
     dpi: int = 150,
 ) -> Path:
     source = source.expanduser().resolve()
+    if not source.exists():
+        raise FileNotFoundError(f"Source does not exist: {source}")
     if out_dir is None:
         out_dir = (source.parent if source.is_file() else source) / "qa-images"
-    else:
         out_dir = out_dir.expanduser().resolve()
 
     pages_dir = out_dir / "pages"

@@ -62,7 +62,7 @@ elements:
       fontFamily: MiSans
       color: "#CCD4D7"
       fontSize: 9
-      text: "数据来源：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7</a>；图源同上"
+      text: "数据来源：小米汽车官网 YU7；图源同上"
 animations:
   - elementId: position-title
     effect: fly-in

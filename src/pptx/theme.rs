@@ -156,8 +156,11 @@ pub fn build_color_slots(theme: Option<&Theme>) -> ColorSlots {
     }
 
     // Leftover keys fill the remaining slots in CLR_SLOT_ORDER.
+    // Sort colors by key for deterministic, reproducible XML emission across builds.
+    let mut sorted_colors: Vec<(&String, &Color)> = theme.colors.iter().collect();
+    sorted_colors.sort_by_key(|(k, _)| *k);
     let mut next = 0;
-    for (key, color) in &theme.colors {
+    for (key, color) in sorted_colors {
         if SEMANTIC_COLOR_KEYS
             .iter()
             .any(|(k, _)| k == &key.to_ascii_lowercase())

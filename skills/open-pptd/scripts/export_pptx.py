@@ -51,6 +51,7 @@ def export_pptx(
     output: Optional[Path] = None,
     pdf: bool = False,
     pptd_bin: Optional[Path] = None,
+    force: bool = False,
 ) -> Path:
     manifest = find_manifest(source)
     if output is None:
@@ -74,8 +75,11 @@ def export_pptx(
     # 2. Build PPTX
     t0 = time.monotonic()
     print(f"[open-pptd] Compiling {manifest.name} -> {output.name} via pptd...")
+    cmd = [str(compiler), "build", str(manifest), "-o", str(output)]
+    if force:
+        cmd.append("--force")
     proc = subprocess.run(
-        [str(compiler), "build", str(manifest), "-o", str(output)],
+        cmd,
         capture_output=True,
         text=True,
     )
@@ -84,7 +88,7 @@ def export_pptx(
         raise RuntimeError(f"pptd exited with code {proc.returncode}")
 
     elapsed = time.monotonic() - t0
-    size_kb = output.stat().st_size / 1024
+    size_kb = output.stat().st_size / 1024 if output.exists() else 0.0
     print(f"[open-pptd] Successfully built native PPTX in {elapsed:.2f}s ({size_kb:.1f} KB)")
     print(f"[open-pptd] Output: {output}")
 
@@ -113,11 +117,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("source", type=Path, help="Path to deck.pptd manifest or project directory")
     parser.add_argument("-o", "--output", type=Path, default=None, help="Output .pptx path (default: <manifest>.pptx)")
     parser.add_argument("--pdf", action="store_true", help="Also convert to PDF via headless LibreOffice if available")
+    parser.add_argument("-f", "--force", action="store_true", help="Force overwrite output even if modified externally")
     parser.add_argument("--compiler", type=Path, default=None, help="Explicit path to pptd binary")
     args = parser.parse_args(argv)
 
     try:
-        export_pptx(args.source, output=args.output, pdf=args.pdf, pptd_bin=args.compiler)
+        export_pptx(args.source, output=args.output, pdf=args.pdf, pptd_bin=args.compiler, force=args.force)
         return 0
     except Exception as err:
         print(f"[open-pptd] Error: {err}", file=sys.stderr)

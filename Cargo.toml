@@ -1,13 +1,13 @@
 [package]
 name = "open-pptd"
-version = "1.0.4"
+version = "1.3.5"
 edition = "2024"
 rust-version = "1.85"
 description = "Declarative Presentation Engine & Agent Skill (PPTD ↔ PPTX compiler)"
 license = "MIT"
 authors = ["meatRoll", "shiquda", "open-pptd contributors"]
-repository = "https://github.com/shiquda/open-pptd"
-homepage = "https://github.com/shiquda/open-pptd#readme"
+repository = "https://github.com/shiquda/open-pptd-skill"
+homepage = "https://github.com/shiquda/open-pptd-skill#readme"
 keywords = ["pptx", "pptd", "presentation", "ooxml", "slides"]
 categories = ["command-line-utilities", "encoding"]
 readme = "README.md"

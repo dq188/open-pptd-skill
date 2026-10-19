@@ -143,7 +143,7 @@ A PPTD project consists of a main entry file and individual page files:
 ```
 project/
   slides_name.pptd     # main entry (size/theme/title + page reference list)
-  media/               # media resources such as images and videos
+  assets/              # media resources such as images and videos (canonical; media/ also supported)
   pages/               # page file directory
     1_cover.page       # one .page file per page
     2_intro.page
@@ -152,7 +152,7 @@ project/
 1. **Fully self-contained**: all referenced files must be located inside the folder containing the `.pptd` file; **referencing files outside the directory is not allowed**
 2. **Only relative paths are supported** (relative to the directory containing the `.pptd` file):
    - The `pages` list in `.pptd`: `pages/1_cover.page`
-   - Image paths in `.page`: `media/image1.jpg`
+   - Image paths in `.page`: `assets/image1.jpg` (or `media/image1.jpg`)
 3. **Media supports URLs**: `Image.src`, and the [ImageFill](#fill).src of `background` / `fill`, may be `https://...` (only jpg/jpeg/png/gif supported)
 
 **Main entry is required:** everything must be loaded through the `.pptd` main entry file; a `.page` cannot be passed alone to the `convert`/`check` commands
@@ -317,7 +317,7 @@ fill:
 # Image
 fill:
   type: image
-  src: "media/bg.jpg"
+  src: "assets/bg.jpg"
   fit: {mode: cover}
   opacity: 0.9
 ```
@@ -786,14 +786,14 @@ interface Shape extends ElementBase {
 ### Line (line)
 
 ```ts
-type ArrowType = "arrow" | "stealth" | "diamond" | "oval";
+type ArrowType = "arrow" | "triangle" | "stealth" | "diamond" | "oval";
 
 interface Line extends ElementBase {
   elementType: "line";
   rotation?: number;                             // default: 0; degrees, clockwise rotation
   opacity?: number;                              // default: 1; constraint: [0, 1]
   flip?: [boolean, boolean];                     // default: [false, false]; [horizontal flip, vertical flip]
-  viewBox: [number, number];                     // path coordinate system [w, h]; points live in this coordinate system, so changing bounds does not require changing points
+  viewBox?: [number, number];                    // optional; path coordinate system [w, h]; defaults to bounds [w, h]
   points: string;                                // bezier path points "x1,y1 x2,y2 ..."; the first/last points are the start/end the curve passes through, the middle points are control points
   curve?: "sharp" | "round" | "smooth";          // default: "round"; sharp joins / rounded joins / bezier smooth curve
   arrow?: [ArrowType | null, ArrowType | null];  // start arrow, end arrow; default: [null, null] (no arrows at either end)
@@ -867,7 +867,7 @@ interface ShapeDef {
 - elementId: img-1
   elementType: image
   bounds: [50, 50, 400, 300]
-  src: "media/cover.jpg"
+  src: "assets/cover.jpg"
   cropShape: {shapeName: roundRect, adjustments: [15000]}
   fit: {mode: cover}
   crop: {top: 0.1, bottom: 0.1, left: 0.05, right: 0.05}   # crop the surrounding proportions first, then apply cover fitting
@@ -880,7 +880,7 @@ interface ShapeDef {
 - elementId: img-2
   elementType: image
   bounds: [200, 200, 200, 200]
-  src: "media/avatar.jpg"
+  src: "assets/avatar.jpg"
   cropShape:
     shapeName: custom
     viewBox: [1000, 1000]
@@ -1946,7 +1946,7 @@ elements:
   - elementId: photo
     elementType: image
     bounds: [60, 140, 400, 300]
-    src: media/pic.png
+    src: assets/pic.png
 animations:
   - elementId: title
     effect: fade-in
